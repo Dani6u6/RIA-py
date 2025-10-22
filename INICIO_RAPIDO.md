@@ -1,4 +1,4 @@
-# 🚀 Inicio Rápido - rIA
+#  Inicio Rápido - rIA
 
 ## Instalación y Ejecución en 3 Pasos
 
@@ -22,7 +22,7 @@ npm run electron-dev
 ```
 Se abrirá automáticamente la ventana de la aplicación.
 
-### 3️⃣ ¡Listo! 🎉
+### 3️⃣ ¡Listo! 
 
 Ya puedes usar rIA:
 - Arrastra y suelta una imagen
@@ -33,7 +33,7 @@ Ya puedes usar rIA:
 
 ---
 
-## 🔧 Comandos Disponibles
+##  Comandos Disponibles
 
 ```bash
 # Desarrollo web
@@ -51,7 +51,7 @@ npm run preview
 
 ---
 
-## 📦 ¿Qué está instalado?
+##  ¿Qué está instalado?
 
 - ✅ React 18 con JavaScript
 - ✅ Tailwind CSS 4.0
@@ -63,7 +63,7 @@ npm run preview
 
 ---
 
-## 🧪 Modo Actual
+##  Modo Actual
 
 **Simulación Frontend**: La aplicación actualmente simula el procesamiento de IA en el navegador usando Canvas API. Los resultados son un simple reescalado con filtros básicos.
 
@@ -71,7 +71,7 @@ npm run preview
 
 ---
 
-## ❓ Problemas Comunes
+##  Problemas Comunes
 
 ### Error: Puerto 5173 en uso
 ```bash
@@ -97,7 +97,7 @@ npm run electron
 
 ---
 
-## 📚 Documentación Completa
+##  Documentación Completa
 
 - `README.md` - Información general del proyecto
 - `INTEGRATION.md` - Cómo integrar el backend de IA
@@ -105,7 +105,7 @@ npm run electron
 
 ---
 
-## 🎨 Personalización
+##  Personalización
 
 ### Cambiar Colores
 Edita `/styles/globals.css` para modificar el tema:
@@ -124,7 +124,7 @@ Los componentes principales están en:
 
 ---
 
-## 💡 Siguiente Nivel
+##  Siguiente Nivel
 
 1. **Conectar Backend Real** → Ver `INTEGRATION.md`
 2. **Desplegar Producción** → `npm run build`

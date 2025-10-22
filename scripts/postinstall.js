@@ -5,8 +5,13 @@
  * Se ejecuta automáticamente después de npm install
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Definir __dirname en entorno ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 console.log('\n🎨 Configurando rIA...\n');
 
@@ -64,11 +69,13 @@ const keyDeps = [
   'sonner'
 ];
 
-const packageJson = require(path.join(process.cwd(), 'package.json'));
+// Cargar package.json (en ESM usamos import dinámico)
+const packageJsonPath = path.join(process.cwd(), 'package.json');
+const packageJsonData = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
 
 keyDeps.forEach(dep => {
-  if (packageJson.dependencies[dep]) {
-    console.log(`✅ ${dep} v${packageJson.dependencies[dep].replace('^', '')}`);
+  if (packageJsonData.dependencies[dep]) {
+    console.log(`✅ ${dep} v${packageJsonData.dependencies[dep].replace('^', '')}`);
   } else {
     console.log(`❌ ${dep} - No instalado`);
   }

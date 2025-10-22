@@ -17,7 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "./components/ui/dropdown-menu";
 import { Sparkles, Download, RotateCcw, Settings2, Moon, Sun } from "lucide-react";
-import { toast } from "sonner@2.0.3";
+import { toast } from "sonner";
 
 export default function App() {
   const [originalImage, setOriginalImage] = useState(null);
