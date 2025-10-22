@@ -1,0 +1,14 @@
+# Backend requirements para rIA
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+python-multipart==0.0.20
+pillow==11.1.0
+pydantic==2.10.6
+
+# Para implementación con IA real (opcional, descomentar cuando sea necesario)
+# torch==2.5.1
+# torchvision==0.20.1
+# numpy==2.2.1
+# opencv-python==4.10.0.84
+# basicsr==1.4.2  # Para Real-ESRGAN
+# realesrgan==0.3.0
