@@ -2,7 +2,7 @@
 
 Aplicación de escritorio para reescalado de imágenes usando IA, construida con React, Tailwind CSS, Electron y FastAPI.
 
-## 🚀 Características
+##  Características
 
 - 🖼️ Carga de imágenes por drag-and-drop
 - 🔄 Comparación interactiva antes/después con slider
@@ -12,12 +12,12 @@ Aplicación de escritorio para reescalado de imágenes usando IA, construida con
 - 💾 Descarga de imágenes procesadas
 - 🎨 Diseño Material UI con Tailwind CSS
 
-## 📋 Requisitos Previos
+##  Requisitos Previos
 
 - Node.js 18+ y npm
 - Python 3.8+ (para el backend FastAPI)
 
-## 🛠️ Instalación
+##  Instalación
 
 ### Frontend (React + Electron)
 
@@ -56,7 +56,7 @@ python main.py         # Inicia el servidor
 - 📖 [Guía de Modelos](backend/MODELOS.md) - Información sobre modelos disponibles
 - 📖 [Setup General](BACKEND_SETUP.md) - Guía de instalación paso a paso
 
-## 📁 Estructura del Proyecto
+##  Estructura del Proyecto
 
 ```
 /
@@ -77,7 +77,7 @@ python main.py         # Inicia el servidor
 └── package.json      # Dependencias y scripts
 ```
 
-## 🎮 Uso
+##  Uso
 
 1. **Activar Backend** (opcional):
    - Inicia el backend siguiendo la guía en `backend/INICIO_RAPIDO.md`
@@ -103,7 +103,7 @@ python main.py         # Inicia el servidor
 
 7. **Descargar**: Guarda la imagen procesada
 
-## 🔧 Tecnologías Utilizadas
+##  Tecnologías Utilizadas
 
 - **Frontend**: React 18, Tailwind CSS 4.0
 - **Desktop**: Electron
@@ -113,11 +113,11 @@ python main.py         # Inicia el servidor
 - **Build Tool**: Vite
 - **Backend**: Python, FastAPI, Real-ESRGAN (ncnn-vulkan)
 
-### ⚠️ Importante: Tailwind CSS v4.0
+###  Importante: Tailwind CSS v4.0
 
 Este proyecto usa **Tailwind CSS v4.0**, que NO requiere `tailwind.config.js`. Toda la configuración se maneja en `styles/globals.css` usando la directiva `@theme`. Ver `TAILWIND_CONFIG.md` para más detalles.
 
-## 🌐 Backend de IA Real
+##  Backend de IA Real
 
 La aplicación incluye un backend completo con **Real-ESRGAN** para procesamiento de IA real:
 
@@ -144,7 +144,7 @@ python main.py
 2. En la app, activa el switch **"Real-ESRGAN (Backend)"**
 3. ¡Listo! Ahora usa IA real en lugar de simulación
 
-## 📝 Notas de Desarrollo
+##  Notas de Desarrollo
 
 - **Modo dual**: La app puede funcionar con o sin backend
 - **Simulación local**: Si el backend no está disponible, usa procesamiento en el navegador
@@ -152,7 +152,7 @@ python main.py
 - **Modo oscuro**: Switch en la esquina superior derecha
 - **Tailwind v4.0**: Sin config file, todo en `styles/globals.css`
 
-## 📚 Documentación
+##  Documentación
 
 - **`INSTALACION.md`** - Guía completa de instalación y solución de problemas
 - **`TAILWIND_CONFIG.md`** - Explicación de la configuración de Tailwind v4.0
@@ -160,10 +160,10 @@ python main.py
 - **`INTEGRATION.md`** - Integración frontend-backend
 - **`RESUMEN_PROYECTO.md`** - Resumen general del proyecto
 
-## 📄 Licencia
+##  Licencia
 
 MIT
 
-## 👥 Autores
+##  Autores
 
 rIA Team

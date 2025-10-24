@@ -135,4 +135,3 @@ Los componentes principales están en:
 
 **¿Necesitas ayuda?** Revisa la documentación o abre un issue en el repositorio.
 
-**¡Feliz reescalado! 🎨✨**

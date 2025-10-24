@@ -4,7 +4,7 @@ Referencia rápida de todos los comandos útiles para el backend.
 
 ---
 
-## 🔧 Setup Inicial
+##  Setup Inicial
 
 ```bash
 # Cambiar al directorio del backend
@@ -19,7 +19,7 @@ python setup.py
 
 ---
 
-## ✅ Verificación
+##  Verificación
 
 ```bash
 # Verificación completa (recomendado antes de iniciar)
@@ -36,7 +36,7 @@ curl http://localhost:8000/api/models
 
 ---
 
-## 🚀 Iniciar Servidor
+##  Iniciar Servidor
 
 ```bash
 # Opción 1: Script automático (recomendado)
@@ -58,7 +58,7 @@ python main.py 2>&1 | tee backend.log
 
 ---
 
-## 🧪 Testing
+##  Testing
 
 ```bash
 # Verificar API con curl
@@ -80,7 +80,7 @@ curl -X POST http://localhost:8000/api/upscale \
 
 ---
 
-## 📊 Diagnóstico
+##  Diagnóstico
 
 ```bash
 # Ver qué archivos hay en binaries/models/
@@ -101,7 +101,7 @@ tail -f backend.log
 
 ---
 
-## 🧹 Limpieza
+##  Limpieza
 
 ```bash
 # Limpiar archivos temporales
@@ -121,7 +121,7 @@ python setup.py
 
 ---
 
-## 🔄 Actualización
+##  Actualización
 
 ```bash
 # Actualizar dependencias
@@ -137,7 +137,7 @@ python setup.py
 
 ---
 
-## 🐛 Debugging
+##  Debugging
 
 ```bash
 # Iniciar servidor en modo debug (más logs)
@@ -164,7 +164,7 @@ python -c "from config import MODELS; print(MODELS.keys())"
 
 ---
 
-## 📦 Gestión de Modelos
+##  Gestión de Modelos
 
 ```bash
 # Listar modelos configurados
@@ -183,7 +183,7 @@ du -sh models/
 
 ---
 
-## 🌐 Acceso Remoto (Opcional)
+##  Acceso Remoto (Opcional)
 
 ```bash
 # Permitir acceso desde otras máquinas en la red local
@@ -203,7 +203,7 @@ ipconfig
 
 ---
 
-## 📈 Monitoreo
+##  Monitoreo
 
 ```bash
 # Ver procesos de Python corriendo
@@ -224,7 +224,7 @@ tail -f backend.log | grep ERROR
 
 ---
 
-## 🛑 Detener Servidor
+##  Detener Servidor
 
 ```bash
 # Ctrl+C en la terminal donde corre
@@ -238,7 +238,7 @@ FOR /F "tokens=5" %P IN ('netstat -ano ^| findstr :8000') DO TaskKill /PID %P /F
 
 ---
 
-## 🔐 Variables de Entorno
+##  Variables de Entorno
 
 ```bash
 # Crear archivo .env desde la plantilla
@@ -254,7 +254,7 @@ set -a; source .env; set +a; python main.py  # Linux/Mac alternativa
 
 ---
 
-## 📝 Atajos Útiles
+##  Atajos Útiles
 
 ```bash
 # Alias para terminal (añadir a .bashrc o .zshrc)
@@ -271,7 +271,7 @@ function ria-start() {
 
 ---
 
-## 🚨 Solución Rápida de Problemas
+##  Solución Rápida de Problemas
 
 ```bash
 # Problema: "No module named 'fastapi'"
@@ -300,7 +300,7 @@ curl http://localhost:8000
 
 ---
 
-## 📚 Más Información
+##  Más Información
 
 ```bash
 # Ver documentación interactiva (con servidor corriendo)
@@ -314,7 +314,7 @@ cat MODELOS.md
 
 ---
 
-## 💡 Tips
+##  Tips
 
 - Usa `verify_setup.py` antes de cada inicio para detectar problemas temprano
 - Usa `check_models.py` si tienes dudas sobre qué modelos están disponibles
