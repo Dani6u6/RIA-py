@@ -16,8 +16,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./components/ui/dropdown-menu";
-import { Sparkles, Download, RotateCcw, Settings2, Moon, Sun } from "lucide-react";
+import { Sparkles, Download, RotateCcw, Settings2, Moon, Sun, Zap } from "lucide-react";
 import { toast } from "sonner";
+import {
+  handleImageSelect as handleImageSelectScript,
+  upscaleImage as upscaleImageScript,
+  handleDownload as handleDownloadScript,
+  handleReset as handleResetScript,
+  resetSettings,
+  applyDarkMode,
+} from "./utils/appScripts";
 
 export default function App() {
   const [originalImage, setOriginalImage] = useState(null);
@@ -36,17 +44,14 @@ export default function App() {
   const [outputPath, setOutputPath] = useState("~/Downloads");
   const [upscaleType, setUpscaleType] = useState("AI Enhanced");
   const [outputSize, setOutputSize] = useState("Auto");
+  const [useRealBackend, setUseRealBackend] = useState(false);
 
   // Dark mode effect
   useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    applyDarkMode(isDarkMode);
   }, [isDarkMode]);
 
-  // Debug effect
+  // Debug effects
   useEffect(() => {
     console.log("useEffect - upscaledImage cambió:", upscaledImage ? "SÍ TIENE VALOR" : "NO TIENE VALOR");
   }, [upscaledImage]);
@@ -55,120 +60,36 @@ export default function App() {
     console.log("useEffect - isProcessing cambió:", isProcessing);
   }, [isProcessing]);
 
+  // Wrapper functions para conectar los scripts con el estado local
   const handleImageSelect = (file) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setOriginalImage(e.target?.result);
-      setUpscaledImage(null);
-      toast.success("Imagen cargada correctamente");
-    };
-    reader.readAsDataURL(file);
+    handleImageSelectScript(file, setOriginalImage, setUpscaledImage);
   };
 
-  const simulateUpscale = async () => {
-    if (!originalImage) {
-      console.log("No hay imagen original");
-      return;
-    }
-
-    console.log("Iniciando procesamiento...");
-    setIsProcessing(true);
-    setProgress(0);
-
-    try {
-      // Simulate AI processing with progress
-      const steps = 20;
-      for (let i = 0; i <= steps; i++) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-        setProgress((i / steps) * 100);
-      }
-
-      console.log("Progreso completado, creando imagen...");
-
-      // In a real app, this would call an AI API
-      const img = new Image();
-      
-      // Wait for image to load
-      await new Promise((resolve, reject) => {
-        img.onload = () => {
-          console.log("Imagen cargada:", img.width, "x", img.height);
-          resolve();
-        };
-        img.onerror = (error) => {
-          console.error("Error al cargar imagen:", error);
-          reject(error);
-        };
-        img.src = originalImage;
-      });
-
-      const canvas = document.createElement("canvas");
-      canvas.width = img.width * scale;
-      canvas.height = img.height * scale;
-      console.log("Canvas creado:", canvas.width, "x", canvas.height);
-      
-      const ctx = canvas.getContext("2d");
-      
-      if (!ctx) {
-        throw new Error("No se pudo obtener el contexto del canvas");
-      }
-
-      // Apply scaling and simulated enhancement
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = "high";
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      
-      console.log("Imagen dibujada en canvas");
-      
-      // Apply slight sharpening effect to simulate AI enhancement
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imageData.data;
-      
-      // Simple contrast adjustment for demo
-      const factor = 1.1 + (denoiseStrength / 500);
-      for (let i = 0; i < data.length; i += 4) {
-        data[i] = Math.min(255, data[i] * factor);
-        data[i + 1] = Math.min(255, data[i + 1] * factor);
-        data[i + 2] = Math.min(255, data[i + 2] * factor);
-      }
-      
-      ctx.putImageData(imageData, 0, 0);
-      console.log("Filtros aplicados");
-      
-      const result = canvas.toDataURL("image/png");
-      console.log("Canvas convertido a dataURL, longitud:", result.length);
-      console.log("Resultado preview:", result.substring(0, 100));
-      
-      // Update states
-      console.log("Actualizando estados...");
-      setUpscaledImage(result);
-      setIsProcessing(false);
-      setRenderKey(prev => prev + 1);
-      
-      console.log("Estados actualizados");
-      toast.success("¡Reescalado completado!");
-      
-    } catch (error) {
-      console.error("Error durante el procesamiento:", error);
-      setIsProcessing(false);
-      toast.error(`Error: ${error.message}`);
-    }
+  const handleUpscale = async () => {
+    await upscaleImageScript(
+      originalImage,
+      scale,
+      model,
+      denoiseStrength,
+      upscaleType,
+      setIsProcessing,
+      setProgress,
+      setUpscaledImage,
+      setRenderKey,
+      useRealBackend
+    );
   };
 
   const handleDownload = () => {
-    if (!upscaledImage) return;
-    
-    const link = document.createElement("a");
-    link.href = upscaledImage;
-    link.download = `upscaled_${scale}x_${Date.now()}.png`;
-    link.click();
-    toast.success(`Imagen guardada en ${outputPath}`);
+    handleDownloadScript(upscaledImage, scale, outputPath);
   };
 
   const handleReset = () => {
-    setOriginalImage(null);
-    setUpscaledImage(null);
-    setProgress(0);
-    toast.info("Reiniciado");
+    handleResetScript(setOriginalImage, setUpscaledImage, setProgress);
+  };
+
+  const handleResetSettings = () => {
+    resetSettings(setOutputPath, setUpscaleType, setOutputSize);
   };
 
   return (
@@ -179,7 +100,7 @@ export default function App() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                {/* <Sparkles className="w-6 h-6 text-white" /> */}
+                <Sparkles className="w-6 h-6 text-white" />
               </div>
               <div>
                 <h1 className="text-gray-900 dark:text-white">rIA</h1>
@@ -263,14 +184,7 @@ export default function App() {
 
                   <DropdownMenuSeparator />
                   
-                  <DropdownMenuItem 
-                    onClick={() => {
-                      setOutputPath("~/Downloads");
-                      setUpscaleType("AI Enhanced");
-                      setOutputSize("Auto");
-                      toast.success("Configuración restablecida");
-                    }}
-                  >
+                  <DropdownMenuItem onClick={handleResetSettings}>
                     Restablecer valores predeterminados
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -327,10 +241,32 @@ export default function App() {
                   disabled={isProcessing}
                 />
 
+                {/* Toggle para usar backend real */}
+                <Card className="p-4 dark:bg-gray-700 dark:border-gray-600">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Zap className={`w-4 h-4 ${useRealBackend ? 'text-green-500' : 'text-gray-400'}`} />
+                      <Label className="text-sm">
+                        {useRealBackend ? "Real-ESRGAN (Backend)" : "Simulación Local"}
+                      </Label>
+                    </div>
+                    <Switch
+                      checked={useRealBackend}
+                      onCheckedChange={setUseRealBackend}
+                      aria-label="Toggle backend real"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                    {useRealBackend 
+                      ? "Procesamiento con IA real (requiere backend activo)" 
+                      : "Procesamiento simulado en el navegador"}
+                  </p>
+                </Card>
+
                 <Button
                   className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
                   size="lg"
-                  onClick={simulateUpscale}
+                  onClick={handleUpscale}
                   disabled={isProcessing}
                 >
                   <Sparkles className="w-5 h-5 mr-2" />

@@ -79,7 +79,7 @@ export async function upscaleImageWithBackend(imageBase64, options = {}) {
 export async function getAvailableModels() {
   try {
     const response = await fetch(`${API_BASE_URL}/api/models`, {
-      method: 'POST',
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       }
@@ -89,16 +89,15 @@ export async function getAvailableModels() {
       throw new Error(`Error del servidor: ${response.status}`);
     }
 
-    const data = await response.json();
-    return data.models || [];
+    const models = await response.json();
+    return models || [];
   } catch (error) {
     console.error('Error al obtener modelos:', error);
     // Retornar modelos por defecto si el backend no está disponible
     return [
-      { id: 'general', name: 'General Purpose', description: 'Modelo general' },
-      { id: 'photo', name: 'Fotografía', description: 'Para fotografías' },
-      { id: 'anime', name: 'Anime & Arte', description: 'Para ilustraciones' },
-      { id: 'face', name: 'Mejora de Rostros', description: 'Para rostros' }
+      { id: 'general', name: 'RealESRGAN_x4plus', description: 'Modelo general para todo tipo de imágenes', scale: 4 },
+      { id: 'anime', name: 'RealESRGAN_x4plus_anime_6B', description: 'Optimizado para anime e ilustraciones', scale: 4 },
+      { id: 'photo', name: 'RealESRNet_x4plus', description: 'Optimizado para fotografías realistas', scale: 4 }
     ];
   }
 }
