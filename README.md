@@ -12,7 +12,7 @@ Aplicación de escritorio para reescalado de imágenes usando IA, construida con
 - 💾 Descarga de imágenes procesadas
 - 🎨 Diseño Material UI con Tailwind CSS
 
-## 📋 Requisitos Previos
+##  Requisitos Previos
 
 - Node.js 18+ y npm
 - Python 3.8+ (para el backend FastAPI)
@@ -81,7 +81,7 @@ uvicorn main:app --reload
 5. **Comparar**: Usa el slider para comparar antes/después
 6. **Descargar**: Guarda la imagen procesada
 
-## 🔧 Tecnologías Utilizadas
+##  Tecnologías Utilizadas
 
 - **Frontend**: React 18, Tailwind CSS 4.0
 - **Desktop**: Electron
@@ -117,4 +117,4 @@ MIT
 
 ##  Autores
 
-rIA Team
+rIA Team: Dani, José, Julio y Juan Carlos
