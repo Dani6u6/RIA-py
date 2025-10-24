@@ -2,7 +2,7 @@
 
 Aplicación de escritorio para reescalado de imágenes usando IA, construida con React, Tailwind CSS, Electron y FastAPI.
 
-## 🚀 Características
+##  Características
 
 - 🖼️ Carga de imágenes por drag-and-drop
 - 🔄 Comparación interactiva antes/después con slider
@@ -17,7 +17,7 @@ Aplicación de escritorio para reescalado de imágenes usando IA, construida con
 - Node.js 18+ y npm
 - Python 3.8+ (para el backend FastAPI)
 
-## 🛠️ Instalación
+##  Instalación
 
 ### Frontend (React + Electron)
 
@@ -45,7 +45,7 @@ pip install fastapi uvicorn pillow torch torchvision
 uvicorn main:app --reload
 ```
 
-## 📁 Estructura del Proyecto
+##  Estructura del Proyecto
 
 ```
 /
@@ -66,7 +66,7 @@ uvicorn main:app --reload
 └── package.json      # Dependencias y scripts
 ```
 
-## 🎮 Uso
+##  Uso
 
 1. **Cargar imagen**: Arrastra y suelta una imagen o haz clic en "Seleccionar imagen"
 2. **Configurar parámetros**:
@@ -91,7 +91,7 @@ uvicorn main:app --reload
 - **Build Tool**: Vite
 - **Backend** (próximamente): Python, FastAPI
 
-## 🌐 Integración con Backend
+##  Integración con Backend
 
 La aplicación está preparada para integrarse con un backend FastAPI. El archivo `electron/preload.js` incluye una función `callBackendAPI` lista para usar:
 
@@ -104,17 +104,17 @@ const result = await window.electronAPI.callBackendAPI('/upscale', {
 });
 ```
 
-## 📝 Notas de Desarrollo
+##  Notas de Desarrollo
 
 - La funcionalidad de IA actualmente está simulada en el frontend
 - Para producción, implementar el backend de FastAPI con modelos de IA reales (ESRGAN, Real-ESRGAN, etc.)
 - Los componentes UI están en TypeScript pero la aplicación principal está en JavaScript
 - El modo oscuro se activa con el switch en la esquina superior derecha
 
-## 📄 Licencia
+##  Licencia
 
 MIT
 
-## 👥 Autores
+##  Autores
 
 rIA Team
