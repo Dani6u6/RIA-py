@@ -37,27 +37,42 @@ REALESRGAN_EXECUTABLE = {
 }
 
 # Modelos disponibles de Real-ESRGAN
+# Estos nombres corresponden a los modelos incluidos en el binario ncnn-vulkan
 MODELS = {
     "general": {
-        "name": "RealESRGAN_x4plus",
-        "filename": "RealESRGAN_x4plus.bin",
-        "param_filename": "RealESRGAN_x4plus.param",
+        "name": "realesrgan-x4plus",
+        "filename": "realesrgan-x4plus.bin",
+        "param_filename": "realesrgan-x4plus.param",
         "scale": 4,
         "description": "Modelo general para todo tipo de imágenes"
     },
     "anime": {
-        "name": "RealESRGAN_x4plus_anime_6B",
-        "filename": "RealESRGAN_x4plus_anime_6B.bin",
-        "param_filename": "RealESRGAN_x4plus_anime_6B.param",
+        "name": "realesrgan-x4plus-anime",
+        "filename": "realesrgan-x4plus-anime.bin",
+        "param_filename": "realesrgan-x4plus-anime.param",
         "scale": 4,
         "description": "Optimizado para anime e ilustraciones"
     },
-    "photo": {
-        "name": "RealESRNet_x4plus",
-        "filename": "RealESRNet_x4plus.bin",
-        "param_filename": "RealESRNet_x4plus.param",
+    "anime-video-2x": {
+        "name": "realesr-animevideov3",
+        "filename": "realesr-animevideov3-x2.bin",
+        "param_filename": "realesr-animevideov3-x2.param",
+        "scale": 2,
+        "description": "Optimizado para anime y video 2x"
+    },
+    "anime-video-3x": {
+        "name": "realesr-animevideov3",
+        "filename": "realesr-animevideov3-x3.bin",
+        "param_filename": "realesr-animevideov3-x3.param",
+        "scale": 3,
+        "description": "Optimizado para anime y video 3x"
+    },
+    "anime-video-4x": {
+        "name": "realesr-animevideov3",
+        "filename": "realesr-animevideov3-x4.bin",
+        "param_filename": "realesr-animevideov3-x4.param",
         "scale": 4,
-        "description": "Optimizado para fotografías realistas"
+        "description": "Optimizado para anime y video 4x"
     }
 }
 

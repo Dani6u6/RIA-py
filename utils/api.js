@@ -95,9 +95,11 @@ export async function getAvailableModels() {
     console.error('Error al obtener modelos:', error);
     // Retornar modelos por defecto si el backend no está disponible
     return [
-      { id: 'general', name: 'RealESRGAN_x4plus', description: 'Modelo general para todo tipo de imágenes', scale: 4 },
-      { id: 'anime', name: 'RealESRGAN_x4plus_anime_6B', description: 'Optimizado para anime e ilustraciones', scale: 4 },
-      { id: 'photo', name: 'RealESRNet_x4plus', description: 'Optimizado para fotografías realistas', scale: 4 }
+      { id: 'general', name: 'realesrgan-x4plus', description: 'Modelo general para todo tipo de imágenes', scale: 4 },
+      { id: 'anime', name: 'realesrgan-x4plus-anime', description: 'Optimizado para anime e ilustraciones', scale: 4 },
+      { id: 'anime-video-2x', name: 'realesr-animevideov3', description: 'Optimizado para anime y video 2x', scale: 2 },
+      { id: 'anime-video-3x', name: 'realesr-animevideov3', description: 'Optimizado para anime y video 3x', scale: 3 },
+      { id: 'anime-video-4x', name: 'realesr-animevideov3', description: 'Optimizado para anime y video 4x', scale: 4 }
     ];
   }
 }

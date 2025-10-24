@@ -1,1 +1,23 @@
-/node_modules
+# Node
+node_modules/
+dist/
+build/
+*.log
+
+# Electron
+/.vite/
+out/
+*.asar
+
+# Python
+venv/
+.venv/
+env/
+ENV/
+__pycache__/
+*.pyc
+*.pyo
+
+# Sistema
+.DS_Store
+Thumbs.db

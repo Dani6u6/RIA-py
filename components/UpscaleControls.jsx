@@ -40,10 +40,11 @@ export function UpscaleControls({
             <SelectValue placeholder="Seleccionar modelo" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="general">General Purpose</SelectItem>
-            <SelectItem value="photo">Fotografía</SelectItem>
-            <SelectItem value="anime">Anime & Arte</SelectItem>
-            <SelectItem value="face">Mejora de Rostros</SelectItem>
+            <SelectItem value="general">General Purpose (4x)</SelectItem>
+            <SelectItem value="anime">Anime & Arte (4x)</SelectItem>
+            <SelectItem value="anime-video-2x">Anime Video (2x)</SelectItem>
+            <SelectItem value="anime-video-3x">Anime Video (3x)</SelectItem>
+            <SelectItem value="anime-video-4x">Anime Video (4x)</SelectItem>
           </SelectContent>
         </Select>
       </div>

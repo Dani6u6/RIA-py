@@ -32,21 +32,28 @@ if ! python3 -c "import fastapi" 2>/dev/null; then
     echo ""
 fi
 
-# Verificar si el binario de Real-ESRGAN existe
-BINARY_FILE="binaries/realesrgan-ncnn-vulkan"
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    BINARY_FILE="binaries/realesrgan-ncnn-vulkan"
-elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
-    BINARY_FILE="binaries/realesrgan-ncnn-vulkan.exe"
-fi
+# Verificar setup completo
+echo "Verificando configuración..."
+python3 verify_setup.py > /dev/null 2>&1
 
-if [ ! -f "$BINARY_FILE" ]; then
-    echo "⚠️  Binario de Real-ESRGAN no encontrado"
-    echo "Ejecutando setup..."
-    python3 setup.py
+if [ $? -ne 0 ]; then
+    echo "⚠️  Setup incompleto. Ejecutando verificación detallada..."
+    echo ""
+    python3 verify_setup.py
     
-    if [ $? -ne 0 ]; then
-        echo "❌ Error en el setup"
+    echo ""
+    read -p "¿Ejecutar setup automático? (s/n): " -n 1 -r
+    echo ""
+    
+    if [[ $REPLY =~ ^[SsYy]$ ]]; then
+        python3 setup.py
+        
+        if [ $? -ne 0 ]; then
+            echo "❌ Error en el setup"
+            exit 1
+        fi
+    else
+        echo "❌ Setup cancelado. Completa el setup manualmente."
         exit 1
     fi
     echo ""

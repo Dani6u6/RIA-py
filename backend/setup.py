@@ -124,64 +124,89 @@ def download_binary():
 
 def download_models():
     """
-    Descarga los modelos de Real-ESRGAN
-    Nota: Real-ESRGAN ncnn-vulkan incluye los modelos en el ZIP descargado
+    Verifica y copia los modelos de Real-ESRGAN
+    Los modelos vienen incluidos en el binario ncnn-vulkan
     """
     logger.info(f"\n{'='*60}")
     logger.info("Verificando modelos de Real-ESRGAN")
     logger.info(f"{'='*60}\n")
     
-    # Los binarios de ncnn-vulkan ya incluyen los modelos .bin y .param
-    # Solo necesitamos verificar que existan
+    import shutil
     
-    system = detect_system()
-    
-    # Buscar modelos en el directorio de binarios
-    models_found = []
-    
-    # Los modelos están en BINARIES_DIR/models/ después de extraer
+    # Los modelos están en BINARIES_DIR/models/ después de extraer el ZIP
     models_subdir = BINARIES_DIR / "models"
     
-    if models_subdir.exists():
-        logger.info(f"Directorio de modelos encontrado: {models_subdir}")
+    if not models_subdir.exists():
+        logger.warning(
+            f"⚠ Directorio de modelos no encontrado: {models_subdir}\n"
+            "Los modelos deberían venir incluidos en el binario descargado."
+        )
+        return False
+    
+    logger.info(f"Directorio de modelos encontrado: {models_subdir}\n")
+    
+    # Listar todos los archivos disponibles
+    available_files = set()
+    for file_path in models_subdir.glob("*"):
+        if file_path.is_file():
+            available_files.add(file_path.name)
+    
+    logger.info(f"Archivos encontrados en {models_subdir}:")
+    for filename in sorted(available_files):
+        logger.info(f"  - {filename}")
+    logger.info("")
+    
+    # Copiar modelos al directorio MODELS_DIR
+    models_found = []
+    
+    for model_id, model_info in MODELS.items():
+        bin_name = model_info["filename"]
+        param_name = model_info["param_filename"]
         
-        # Copiar modelos al directorio MODELS_DIR si no están ahí
-        for model_id, model_info in MODELS.items():
-            bin_name = model_info["filename"]
-            param_name = model_info["param_filename"]
-            
-            src_bin = models_subdir / bin_name
-            src_param = models_subdir / param_name
-            
-            dst_bin = MODELS_DIR / bin_name
-            dst_param = MODELS_DIR / param_name
-            
+        src_bin = models_subdir / bin_name
+        src_param = models_subdir / param_name
+        
+        dst_bin = MODELS_DIR / bin_name
+        dst_param = MODELS_DIR / param_name
+        
+        # Verificar si ambos archivos existen
+        bin_exists = src_bin.exists()
+        param_exists = src_param.exists()
+        
+        if bin_exists and param_exists:
             # Copiar .bin
-            if src_bin.exists() and not dst_bin.exists():
-                import shutil
+            if not dst_bin.exists():
                 shutil.copy2(src_bin, dst_bin)
                 logger.info(f"✓ Modelo copiado: {bin_name}")
-            elif dst_bin.exists():
+            else:
                 logger.info(f"✓ Modelo ya existe: {bin_name}")
             
             # Copiar .param
-            if src_param.exists() and not dst_param.exists():
-                import shutil
+            if not dst_param.exists():
                 shutil.copy2(src_param, dst_param)
                 logger.info(f"✓ Parámetros copiados: {param_name}")
-            elif dst_param.exists():
+            else:
                 logger.info(f"✓ Parámetros ya existen: {param_name}")
             
-            if dst_bin.exists() and dst_param.exists():
-                models_found.append(model_id)
+            models_found.append(model_id)
+        else:
+            # Informar qué archivos faltan
+            missing = []
+            if not bin_exists:
+                missing.append(bin_name)
+            if not param_exists:
+                missing.append(param_name)
+            logger.warning(f"⚠ Modelo '{model_id}' incompleto. Faltan: {', '.join(missing)}")
+    
+    logger.info("")
     
     if models_found:
-        logger.info(f"\n✓ Modelos disponibles: {', '.join(models_found)}")
+        logger.info(f"✓ Modelos copiados exitosamente: {', '.join(models_found)}")
         return True
     else:
-        logger.warning(
-            "\n⚠ No se encontraron modelos. "
-            "Verifica que el binario se haya descargado correctamente."
+        logger.error(
+            "✗ No se pudieron copiar modelos.\n"
+            "Verifica que los archivos .bin y .param estén en binaries/models/"
         )
         return False
 

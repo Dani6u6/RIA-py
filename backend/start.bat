@@ -35,14 +35,28 @@ if errorlevel 1 (
     echo.
 )
 
-REM Verificar si el binario de Real-ESRGAN existe
-if not exist "binaries\realesrgan-ncnn-vulkan.exe" (
-    echo Binario de Real-ESRGAN no encontrado
-    echo Ejecutando setup...
-    python setup.py
+REM Verificar setup completo
+echo Verificando configuracion...
+python verify_setup.py >nul 2>&1
+
+if errorlevel 1 (
+    echo Configuracion incompleta. Ejecutando verificacion detallada...
+    echo.
+    python verify_setup.py
     
-    if errorlevel 1 (
-        echo Error en el setup
+    echo.
+    set /p ejecutar_setup="Ejecutar setup automatico? (s/n): "
+    
+    if /i "%ejecutar_setup%"=="s" (
+        python setup.py
+        
+        if errorlevel 1 (
+            echo Error en el setup
+            pause
+            exit /b 1
+        )
+    ) else (
+        echo Setup cancelado. Completa el setup manualmente.
         pause
         exit /b 1
     )
