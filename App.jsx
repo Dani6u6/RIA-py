@@ -16,11 +16,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./components/ui/dropdown-menu";
-import { Sparkles, Download, RotateCcw, Settings2, Moon, Sun } from "lucide-react";
+import { Sparkles, Download, RotateCcw, Settings2, Moon, Sun, Zap } from "lucide-react";
 import { toast } from "sonner";
 import {
   handleImageSelect as handleImageSelectScript,
-  simulateUpscale as simulateUpscaleScript,
+  upscaleImage as upscaleImageScript,
   handleDownload as handleDownloadScript,
   handleReset as handleResetScript,
   resetSettings,
@@ -44,6 +44,7 @@ export default function App() {
   const [outputPath, setOutputPath] = useState("~/Downloads");
   const [upscaleType, setUpscaleType] = useState("AI Enhanced");
   const [outputSize, setOutputSize] = useState("Auto");
+  const [useRealBackend, setUseRealBackend] = useState(false);
 
   // Dark mode effect
   useEffect(() => {
@@ -64,15 +65,18 @@ export default function App() {
     handleImageSelectScript(file, setOriginalImage, setUpscaledImage);
   };
 
-  const simulateUpscale = async () => {
-    await simulateUpscaleScript(
+  const handleUpscale = async () => {
+    await upscaleImageScript(
       originalImage,
       scale,
+      model,
       denoiseStrength,
+      upscaleType,
       setIsProcessing,
       setProgress,
       setUpscaledImage,
-      setRenderKey
+      setRenderKey,
+      useRealBackend
     );
   };
 
@@ -96,8 +100,7 @@ export default function App() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                {/* <Sparkles className="w-6 h-6 text-white" /> */}
-                <img src="/components/img/logoRIA.svg" alt="Logo" className="w-6 h-6" />
+                <Sparkles className="w-6 h-6 text-white" />
               </div>
               <div>
                 <h1 className="text-gray-900 dark:text-white">rIA</h1>
@@ -238,10 +241,32 @@ export default function App() {
                   disabled={isProcessing}
                 />
 
+                {/* Toggle para usar backend real */}
+                <Card className="p-4 dark:bg-gray-700 dark:border-gray-600">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Zap className={`w-4 h-4 ${useRealBackend ? 'text-green-500' : 'text-gray-400'}`} />
+                      <Label className="text-sm">
+                        {useRealBackend ? "Real-ESRGAN (Backend)" : "Simulación Local"}
+                      </Label>
+                    </div>
+                    <Switch
+                      checked={useRealBackend}
+                      onCheckedChange={setUseRealBackend}
+                      aria-label="Toggle backend real"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                    {useRealBackend 
+                      ? "Procesamiento con IA real (requiere backend activo)" 
+                      : "Procesamiento simulado en el navegador"}
+                  </p>
+                </Card>
+
                 <Button
                   className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
                   size="lg"
-                  onClick={simulateUpscale}
+                  onClick={handleUpscale}
                   disabled={isProcessing}
                 >
                   <Sparkles className="w-5 h-5 mr-2" />

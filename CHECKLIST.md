@@ -52,7 +52,7 @@ Usa esta lista para asegurarte de que todo está configurado correctamente antes
 
 ---
 
-## 🐍 Instalación Backend (Opcional)
+##  Instalación Backend (Opcional)
 
 ### Entorno Python
 - [ ] Directorio `backend-example/` existe
@@ -67,7 +67,7 @@ Usa esta lista para asegurarte de que todo está configurado correctamente antes
 
 ---
 
-## 🚀 Ejecución
+##  Ejecución
 
 ### Modo Web (Solo Frontend)
 - [ ] `npm run dev` ejecuta sin errores
@@ -91,7 +91,7 @@ Usa esta lista para asegurarte de que todo está configurado correctamente antes
 
 ---
 
-## 🧪 Funcionalidad Básica
+##  Funcionalidad Básica
 
 ### Carga de Imágenes
 - [ ] Área de drag-and-drop visible
@@ -161,7 +161,7 @@ Usa esta lista para asegurarte de que todo está configurado correctamente antes
 
 ---
 
-## 🎨 UI/UX Checks
+##  UI/UX Checks
 
 ### Visual
 - [ ] Colores se ven correctamente
@@ -194,7 +194,7 @@ Usa esta lista para asegurarte de que todo está configurado correctamente antes
 
 ---
 
-## 🔗 Integración (Si aplica)
+##  Integración (Si aplica)
 
 ### Frontend → Backend
 - [ ] Frontend puede conectarse a backend
@@ -212,7 +212,7 @@ Usa esta lista para asegurarte de que todo está configurado correctamente antes
 
 ---
 
-## 🐛 Debugging
+##  Debugging
 
 ### Console Errors
 - [ ] No hay errores en consola del navegador
@@ -232,7 +232,7 @@ Usa esta lista para asegurarte de que todo está configurado correctamente antes
 
 ---
 
-## 📚 Documentación
+##  Documentación
 
 ### Archivos Presentes
 - [ ] `README.md` completo y legible
@@ -251,7 +251,7 @@ Usa esta lista para asegurarte de que todo está configurado correctamente antes
 
 ---
 
-## 🏁 Ready to Deploy Checklist
+##  Ready to Deploy Checklist
 
 ### Pre-Producción
 - [ ] Todos los tests anteriores pasan ✅
@@ -275,7 +275,7 @@ Usa esta lista para asegurarte de que todo está configurado correctamente antes
 
 ---
 
-## 🎯 Resultados Esperados
+##  Resultados Esperados
 
 ### Al Finalizar Este Checklist
 Si todos los items están marcados ✅, deberías tener:
@@ -291,7 +291,7 @@ Si todos los items están marcados ✅, deberías tener:
 
 ---
 
-## 📊 Scoring
+##  Scoring
 
 Cuenta los items marcados:
 
@@ -303,7 +303,7 @@ Cuenta los items marcados:
 
 ---
 
-## 🆘 Si Algo Falla
+##  Si Algo Falla
 
 ### Pasos de Troubleshooting
 
@@ -336,7 +336,7 @@ uvicorn main:app --reload --log-level debug
 
 ---
 
-## ✅ Checklist Completado
+##  Checklist Completado
 
 **Fecha de verificación:** _______________
 
@@ -351,4 +351,4 @@ uvicorn main:app --reload --log-level debug
 
 ---
 
-**¡Usa este checklist cada vez que configures el proyecto en un nuevo entorno!** 📝
+**¡Usa este checklist cada vez que configures el proyecto en un nuevo entorno!** 

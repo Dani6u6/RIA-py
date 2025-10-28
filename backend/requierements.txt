@@ -1,0 +1,19 @@
+# Backend requirements para rIA con Real-ESRGAN
+
+# Framework web
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+python-multipart==0.0.20
+
+# Procesamiento de imágenes
+pillow==11.1.0
+
+# Validación de datos
+pydantic==2.10.6
+
+# Utilities
+python-dotenv==1.0.0
+
+# Nota: Real-ESRGAN se ejecuta como binario externo (ncnn-vulkan)
+# No se requiere instalar torch, torchvision u otras dependencias pesadas
+# El binario ya incluye todo lo necesario para ejecutar los modelos
