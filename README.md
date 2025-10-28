@@ -166,4 +166,4 @@ MIT
 
 ##  Autores
 
-rIA Team
+rIA Team: Dani, José, Julio y Juan Carlos
