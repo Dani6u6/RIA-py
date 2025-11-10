@@ -36,11 +36,17 @@ export async function upscaleImageWithBackend(imageBase64, options = {}) {
   } = options;
 
   try {
+    // Crear AbortController para timeout personalizado
+    // 900000ms = 15 minutos (ajustable según necesidad)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 900000);
+
     const response = await fetch(`${API_BASE_URL}/api/upscale`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
+      signal: controller.signal,
       body: JSON.stringify({
         image: imageBase64,
         scale,
@@ -49,6 +55,8 @@ export async function upscaleImageWithBackend(imageBase64, options = {}) {
         upscale_type: upscaleType
       })
     });
+
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       throw new Error(`Error del servidor: ${response.status}`);
@@ -68,6 +76,9 @@ export async function upscaleImageWithBackend(imageBase64, options = {}) {
       message: result.message
     };
   } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error('⏱️ Timeout: El procesamiento tomó más de 15 minutos. Intenta con una imagen más pequeña o ajusta el timeout.');
+    }
     console.error('Error al llamar al backend:', error);
     throw error;
   }

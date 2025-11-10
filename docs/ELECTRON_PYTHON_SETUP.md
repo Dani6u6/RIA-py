@@ -4,7 +4,7 @@ Esta guía te ayudará a ejecutar rIA como una aplicación de escritorio complet
 
 ---
 
-##  Arquitectura
+## 🎯 Arquitectura
 
 ```
 ┌─────────────────────────────────────────┐
@@ -33,7 +33,7 @@ Esta guía te ayudará a ejecutar rIA como una aplicación de escritorio complet
 
 ---
 
-##  Requisitos Previos
+## 📋 Requisitos Previos
 
 ### Frontend (Electron)
 - Node.js 18 o superior
@@ -45,7 +45,7 @@ Esta guía te ayudará a ejecutar rIA como una aplicación de escritorio complet
 
 ---
 
-##  Instalación Paso a Paso
+## 🚀 Instalación Paso a Paso
 
 ### Paso 1: Configurar Frontend
 
@@ -85,7 +85,7 @@ pip install -r requirements.txt
 
 ---
 
-## ▶ Ejecución
+## ▶️ Ejecución
 
 ### Opción 1: Desarrollo (Frontend + Backend)
 
@@ -197,7 +197,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 ---
 
-##  Build para Producción
+## 📦 Build para Producción
 
 ### Frontend (Electron App)
 
@@ -314,7 +314,7 @@ React muestra resultado
 
 ---
 
-##  Debugging
+## 🐛 Debugging
 
 ### Logs del Frontend
 
@@ -363,7 +363,7 @@ fetch('http://localhost:8000/health')
 
 ---
 
-##  Seguridad
+## 🔐 Seguridad
 
 ### CORS
 
@@ -372,7 +372,7 @@ El backend ya incluye configuración CORS:
 ```python
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # En producción, especificar origen exacto
+    allow_origins=["*"],  # ⚠️ En producción, especificar origen exacto
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -442,7 +442,7 @@ uvicorn main:app --workers 4
 
 ---
 
-##  Monitoreo
+## 📊 Monitoreo
 
 ### Prometheus + Grafana (Opcional)
 
@@ -455,7 +455,7 @@ upscale_duration = Histogram('upscale_duration_seconds', 'Upscale duration')
 
 ---
 
-##  Problemas Comunes
+## ❓ Problemas Comunes
 
 ### Backend no se conecta
 
@@ -482,7 +482,7 @@ upscale_duration = Histogram('upscale_duration_seconds', 'Upscale duration')
 
 ---
 
-##  Recursos Adicionales
+## 📚 Recursos Adicionales
 
 - [Electron Documentation](https://www.electronjs.org/docs)
 - [FastAPI Documentation](https://fastapi.tiangolo.com/)
@@ -491,4 +491,4 @@ upscale_duration = Histogram('upscale_duration_seconds', 'Upscale duration')
 
 ---
 
-
+**¡Todo listo para ejecutar rIA como una aplicación de escritorio profesional!** 🎉

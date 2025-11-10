@@ -147,11 +147,9 @@ class RealESRGANService:
             if tile_size > 0:
                 cmd.extend(["-t", str(tile_size)])
             
-            # Denoise strength (solo para algunos modelos)
-            if denoise_strength >= 0 and model == "general":
-                # Convertir de 0-1 a -1-1 como espera Real-ESRGAN
-                dn_value = denoise_strength * 2 - 1
-                cmd.extend(["-d", str(int(dn_value))])
+            # NOTA: El binario ncnn-vulkan de Real-ESRGAN NO soporta el parámetro -d (denoise)
+            # El denoise está integrado en cada modelo y no se puede ajustar en runtime
+            # El parámetro denoise_strength se ignora para el binario ncnn-vulkan
             
             logger.info(f"Ejecutando comando: {' '.join(cmd)}")
             

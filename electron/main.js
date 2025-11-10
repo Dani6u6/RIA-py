@@ -1,12 +1,12 @@
-// electron/main.js (versión ESM)
 import { app, BrowserWindow } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+let mainWindow;
+
+// __dirname y __filename en ES Modules:
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-let mainWindow;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -17,19 +17,21 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, 'preload.js')
     },
     backgroundColor: '#f8fafc',
     show: false,
-    icon: path.join(__dirname, '../assets/icon.png'),
+    icon: path.join(__dirname, '../assets/icon.png')
   });
 
+  // En desarrollo: cargar el servidor de Vite
   const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
 
   if (isDev) {
     mainWindow.loadURL('http://localhost:5173');
     mainWindow.webContents.openDevTools();
   } else {
+    // Producción: cargar build
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
   }
 
