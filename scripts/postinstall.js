@@ -2,18 +2,20 @@
 
 /**
  * Script de post-instalación para rIA
- * Se ejecuta automáticamente después de npm install
+ * Versión ESM (compatible con "type": "module")
  */
 
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-// Definir __dirname en entorno ESM
+// __dirname en ESM:
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 console.log('\n🎨 Configurando rIA...\n');
+
+const cwd = process.cwd();
 
 // Verificar que los directorios necesarios existan
 const directories = [
@@ -27,7 +29,7 @@ const directories = [
 let allGood = true;
 
 directories.forEach(dir => {
-  const dirPath = path.join(process.cwd(), dir);
+  const dirPath = path.join(cwd, dir);
   if (fs.existsSync(dirPath)) {
     console.log(`✅ ${dir}/`);
   } else {
@@ -50,7 +52,7 @@ const criticalFiles = [
 console.log('\n📄 Verificando archivos críticos:\n');
 
 criticalFiles.forEach(file => {
-  const filePath = path.join(process.cwd(), file);
+  const filePath = path.join(cwd, file);
   if (fs.existsSync(filePath)) {
     console.log(`✅ ${file}`);
   } else {
@@ -61,7 +63,11 @@ criticalFiles.forEach(file => {
 
 console.log('\n📦 Dependencias instaladas:\n');
 
-// Verificar algunas dependencias clave
+// Cargar package.json como ESM
+const packageJsonPath = path.join(cwd, 'package.json');
+const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+
+// Dependencias clave
 const keyDeps = [
   'react',
   'react-dom',
@@ -69,13 +75,9 @@ const keyDeps = [
   'sonner'
 ];
 
-// Cargar package.json (en ESM usamos import dinámico)
-const packageJsonPath = path.join(process.cwd(), 'package.json');
-const packageJsonData = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-
 keyDeps.forEach(dep => {
-  if (packageJsonData.dependencies[dep]) {
-    console.log(`✅ ${dep} v${packageJsonData.dependencies[dep].replace('^', '')}`);
+  if (packageJson.dependencies?.[dep]) {
+    console.log(`✅ ${dep} v${packageJson.dependencies[dep].replace('^', '')}`);
   } else {
     console.log(`❌ ${dep} - No instalado`);
   }

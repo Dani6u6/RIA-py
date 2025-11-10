@@ -338,5 +338,7 @@ if __name__ == "__main__":
         host=API_HOST,
         port=API_PORT,
         reload=API_RELOAD,
-        log_level="info"
+        log_level="info",
+        timeout_keep_alive=900,  # 15 minutos - evita que uvicorn cierre conexiones largas
+        timeout_graceful_shutdown=30  # 30 segundos para shutdown limpio
     )

@@ -14,11 +14,9 @@ Backend de la aplicación rIA para reescalado de imágenes usando Real-ESRGAN co
 ## Requisitos del Sistema
 
 ### Python
-
 - Python 3.8 o superior
 
 ### GPU (Recomendado)
-
 - GPU compatible con Vulkan
 - Drivers actualizados
 
@@ -36,7 +34,6 @@ pip install -r requirements.txt
 ### 2. Descargar binarios y modelos
 
 El script de setup descargará automáticamente:
-
 - El binario de Real-ESRGAN para tu sistema operativo
 - Los modelos de IA necesarios
 
@@ -49,7 +46,6 @@ Este proceso puede tardar varios minutos dependiendo de tu conexión.
 ### Verificación del setup
 
 El script mostrará un resumen al final:
-
 ```
 ✓ Ejecutable encontrado
 ✓ Modelo 'general' disponible
@@ -113,11 +109,9 @@ El servidor estará disponible en: `http://localhost:8000`
 ### Endpoints disponibles
 
 #### `GET /`
-
 Verificar que el servidor está funcionando
 
 #### `GET /health`
-
 Estado del servidor y modelos disponibles
 
 ```json
@@ -130,7 +124,6 @@ Estado del servidor y modelos disponibles
 ```
 
 #### `GET /api/models`
-
 Listar modelos disponibles
 
 ```json
@@ -145,11 +138,9 @@ Listar modelos disponibles
 ```
 
 #### `POST /api/upscale`
-
 Reescalar una imagen
 
 **Request Body:**
-
 ```json
 {
   "image": "data:image/png;base64,...",
@@ -162,7 +153,6 @@ Reescalar una imagen
 ```
 
 **Response:**
-
 ```json
 {
   "success": true,
@@ -175,25 +165,21 @@ Reescalar una imagen
 ```
 
 #### `POST /api/upscale/file`
-
 Alternativa que acepta archivos directamente (multipart/form-data)
 
 ## Modelos Disponibles
 
 ### General (realesrgan-x4plus)
-
 - **Uso**: Todo tipo de imágenes
 - **Escala**: 4x
 - **Mejor para**: Fotografías, texturas, imágenes generales
 
 ### Anime (realesrgan-x4plus-anime)
-
 - **Uso**: Ilustraciones y anime
 - **Escala**: 4x
 - **Mejor para**: Arte digital, anime, ilustraciones estáticas
 
 ### Anime Video (realesr-animevideov3)
-
 - **Uso**: Anime y video
 - **Escalas disponibles**: 2x, 3x, 4x
 - **Mejor para**: Contenido de anime con movimiento, frames de video
@@ -227,41 +213,32 @@ PROCESSING_TIMEOUT = 300  # Timeout en segundos
 ## Solución de Problemas
 
 ### Error: "Ejecutable de Real-ESRGAN no encontrado"
-
 **Solución**: Ejecuta `python setup.py` para descargar los binarios
 
 ### Error: "No se encontraron modelos"
-
-**Solución**:
-
+**Solución**: 
 1. Verifica que `setup.py` se ejecutó correctamente
 2. Verifica manualmente el directorio `binaries/models/`
 3. Copia manualmente los modelos a `models/` si es necesario
 
 ### Procesamiento muy lento
-
 **Causas posibles**:
-
 1. No hay GPU disponible (ejecutando en CPU)
 2. Imagen muy grande (usa tile_size > 0)
 3. Drivers de Vulkan no instalados
 
 **Soluciones**:
-
 - Instala drivers de GPU actualizados
 - Usa `tile_size: 400` para imágenes grandes
 - Reduce el tamaño de la imagen antes de procesar
 
 ### Error: "Vulkan not found"
-
 **Solución**: Instala los drivers de Vulkan para tu GPU
-
 - NVIDIA: Incluidos en drivers GeForce/Quadro
 - AMD: Incluidos en drivers Radeon
 - Intel: Incluidos en drivers HD Graphics
 
 ### Timeout en procesamiento
-
 **Solución**: Aumenta `PROCESSING_TIMEOUT` en `config.py`
 
 ## Integración con Electron
@@ -273,7 +250,6 @@ Ver `utils/api.js` en el frontend para la implementación del cliente.
 ## Limpieza de Archivos
 
 Los archivos temporales se limpian automáticamente:
-
 - Al iniciar el servidor (archivos > 24 horas)
 - Después de cada procesamiento exitoso
 - En caso de error
@@ -301,7 +277,6 @@ MODELS = {
 ### Logs
 
 Los logs se muestran en la consola con el formato:
-
 ```
 2025-10-23 10:30:45 - upscale_service - INFO - Procesando imagen: 1024x768
 ```
@@ -309,12 +284,10 @@ Los logs se muestran en la consola con el formato:
 ## Performance
 
 ### Tiempos estimados (GPU NVIDIA RTX 3060)
-
 - 512x512 → 2048x2048 (4x): ~2-3 segundos
 - 1024x1024 → 4096x4096 (4x): ~8-10 segundos
 
 ### Tiempos estimados (CPU Intel i7)
-
 - 512x512 → 2048x2048 (4x): ~30-40 segundos
 - 1024x1024 → 4096x4096 (4x): ~2-3 minutos
 

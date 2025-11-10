@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { flushSync } from "react-dom";
 import { ImageUploader } from "./components/ImageUploader";
 import { ImageComparison } from "./components/ImageComparison";
 import { UpscaleControls } from "./components/UpscaleControls";
@@ -16,20 +17,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./components/ui/dropdown-menu";
-import { Sparkles, Download, RotateCcw, Settings2, Moon, Sun, Server, HelpCircle, Info } from "lucide-react";
-import LogoRia from "./components/img/logoria2.svg";
-import { toast } from "sonner";
 import {
-  handleImageSelect as handleImageSelectScript,
-  upscaleImage as upscaleImageScript,
-  handleDownload as handleDownloadScript,
-  handleReset as handleResetScript,
-  resetSettings,
-  applyDarkMode,
-} from "./utils/appScripts";
-import { Onboarding } from "./components/Onboarding";
-import { AboutDialog } from "./components/AboutDialog";
-import { BackendStatusDialog } from "./components/BackendStatusDialog";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./components/ui/dialog";
+import { Sparkles, Download, RotateCcw, Settings2, Moon, Sun } from "lucide-react";
+import { toast } from "sonner@2.0.3";
 
 export default function App() {
   const [originalImage, setOriginalImage] = useState(null);
@@ -42,24 +39,23 @@ export default function App() {
   // Controls state
   const [scale, setScale] = useState(2);
   const [model, setModel] = useState("general");
-  const [useRealBackend, setUseRealBackend] = useState(false);
+  const [denoiseStrength, setDenoiseStrength] = useState(50);
   
   // Settings state
   const [outputPath, setOutputPath] = useState("~/Downloads");
   const [upscaleType, setUpscaleType] = useState("AI Enhanced");
   const [outputSize, setOutputSize] = useState("Auto");
-  
-  // Onboarding and dialogs state
-  const [showOnboarding, setShowOnboarding] = useState(false);
-  const [showAbout, setShowAbout] = useState(false);
-  const [showBackendStatus, setShowBackendStatus] = useState(false);
 
   // Dark mode effect
   useEffect(() => {
-    applyDarkMode(isDarkMode);
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   }, [isDarkMode]);
 
-  // Debug effects
+  // Debug effect
   useEffect(() => {
     console.log("useEffect - upscaledImage cambió:", upscaledImage ? "SÍ TIENE VALOR" : "NO TIENE VALOR");
   }, [upscaledImage]);
@@ -68,36 +64,120 @@ export default function App() {
     console.log("useEffect - isProcessing cambió:", isProcessing);
   }, [isProcessing]);
 
-  // Wrapper functions para conectar los scripts con el estado local
   const handleImageSelect = (file) => {
-    handleImageSelectScript(file, setOriginalImage, setUpscaledImage);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setOriginalImage(e.target?.result);
+      setUpscaledImage(null);
+      toast.success("Imagen cargada correctamente");
+    };
+    reader.readAsDataURL(file);
   };
 
-  const handleUpscale = async () => {
-    await upscaleImageScript(
-      originalImage,
-      scale,
-      model,
-      50, // denoiseStrength fijo (no usado por ncnn-vulkan)
-      upscaleType,
-      setIsProcessing,
-      setProgress,
-      setUpscaledImage,
-      setRenderKey,
-      useRealBackend
-    );
+  const simulateUpscale = async () => {
+    if (!originalImage) {
+      console.log("No hay imagen original");
+      return;
+    }
+
+    console.log("Iniciando procesamiento...");
+    setIsProcessing(true);
+    setProgress(0);
+
+    try {
+      // Simulate AI processing with progress
+      const steps = 20;
+      for (let i = 0; i <= steps; i++) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        setProgress((i / steps) * 100);
+      }
+
+      console.log("Progreso completado, creando imagen...");
+
+      // In a real app, this would call an AI API
+      const img = new Image();
+      
+      // Wait for image to load
+      await new Promise((resolve, reject) => {
+        img.onload = () => {
+          console.log("Imagen cargada:", img.width, "x", img.height);
+          resolve();
+        };
+        img.onerror = (error) => {
+          console.error("Error al cargar imagen:", error);
+          reject(error);
+        };
+        img.src = originalImage;
+      });
+
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+      console.log("Canvas creado:", canvas.width, "x", canvas.height);
+      
+      const ctx = canvas.getContext("2d");
+      
+      if (!ctx) {
+        throw new Error("No se pudo obtener el contexto del canvas");
+      }
+
+      // Apply scaling and simulated enhancement
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      
+      console.log("Imagen dibujada en canvas");
+      
+      // Apply slight sharpening effect to simulate AI enhancement
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      
+      // Simple contrast adjustment for demo
+      const factor = 1.1 + (denoiseStrength / 500);
+      for (let i = 0; i < data.length; i += 4) {
+        data[i] = Math.min(255, data[i] * factor);
+        data[i + 1] = Math.min(255, data[i + 1] * factor);
+        data[i + 2] = Math.min(255, data[i + 2] * factor);
+      }
+      
+      ctx.putImageData(imageData, 0, 0);
+      console.log("Filtros aplicados");
+      
+      const result = canvas.toDataURL("image/png");
+      console.log("Canvas convertido a dataURL, longitud:", result.length);
+      console.log("Resultado preview:", result.substring(0, 100));
+      
+      // Update states
+      console.log("Actualizando estados...");
+      setUpscaledImage(result);
+      setIsProcessing(false);
+      setRenderKey(prev => prev + 1);
+      
+      console.log("Estados actualizados");
+      toast.success("¡Reescalado completado!");
+      
+    } catch (error) {
+      console.error("Error durante el procesamiento:", error);
+      setIsProcessing(false);
+      toast.error(`Error: ${error.message}`);
+    }
   };
 
   const handleDownload = () => {
-    handleDownloadScript(upscaledImage, scale, outputPath);
+    if (!upscaledImage) return;
+    
+    const link = document.createElement("a");
+    link.href = upscaledImage;
+    link.download = `upscaled_${scale}x_${Date.now()}.png`;
+    link.click();
+    toast.success(`Imagen guardada en ${outputPath}`);
   };
 
   const handleReset = () => {
-    handleResetScript(setOriginalImage, setUpscaledImage, setProgress);
-  };
-
-  const handleResetSettings = () => {
-    resetSettings(setOutputPath, setUpscaleType, setOutputSize);
+    setOriginalImage(null);
+    setUpscaledImage(null);
+    setProgress(0);
+    toast.info("Reiniciado");
   };
 
   return (
@@ -107,7 +187,9 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <img src={LogoRia} alt="rIA Logo" className="w-10 h-10 rounded-lg" />
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                <Sparkles className="w-6 h-6 text-white" />
+              </div>
               <div>
                 <h1 className="text-gray-900 dark:text-white">rIA</h1>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Reescalado inteligente de imágenes</p>
@@ -115,36 +197,6 @@ export default function App() {
             </div>
             
             <div className="flex items-center gap-3">
-              {/* Backend Status Button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowBackendStatus(true)}
-                aria-label="Estado del Backend"
-              >
-                <Server className="w-5 h-5" />
-              </Button>
-
-              {/* Help Button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowOnboarding(true)}
-                aria-label="Ayuda"
-              >
-                <HelpCircle className="w-5 h-5" />
-              </Button>
-
-              {/* About Button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowAbout(true)}
-                aria-label="Acerca de"
-              >
-                <Info className="w-5 h-5" />
-              </Button>
-
               {/* Dark Mode Toggle */}
               <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
                 <Sun className="w-4 h-4 text-gray-600 dark:text-gray-400" />
@@ -220,7 +272,14 @@ export default function App() {
 
                   <DropdownMenuSeparator />
                   
-                  <DropdownMenuItem onClick={handleResetSettings}>
+                  <DropdownMenuItem 
+                    onClick={() => {
+                      setOutputPath("~/Downloads");
+                      setUpscaleType("AI Enhanced");
+                      setOutputSize("Auto");
+                      toast.success("Configuración restablecida");
+                    }}
+                  >
                     Restablecer valores predeterminados
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -232,44 +291,66 @@ export default function App() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-6">
-          {/* Row 1: Upload and Results - Side by side on large screens */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left Column - Upload */}
-            <div className="lg:col-span-1">
-              <Card className="p-6 dark:bg-gray-800 dark:border-gray-700 min-h-[400px]">
-                <div className="h-full flex items-center justify-center">
-                  {!originalImage ? (
-                    <ImageUploader onImageSelect={handleImageSelect} />
-                  ) : (
-                    <div className="space-y-4 w-full">
-                      <div className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700">
-                        <img
-                          src={originalImage}
-                          alt="Original"
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400 text-center">
-                        Imagen original cargada
-                      </div>
-                      <Button
-                        variant="outline"
-                        className="w-full"
-                        onClick={handleReset}
-                        disabled={isProcessing}
-                      >
-                        <RotateCcw className="w-4 h-4 mr-2" />
-                        Cargar otra imagen
-                      </Button>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start">
+          {/* Left Column - Upload and Controls */}
+          <div className="lg:col-span-1 space-y-6">
+            <Card className="p-6 dark:bg-gray-800 dark:border-gray-700 min-h-[400px]">
+              <div className="h-full flex items-center justify-center">
+                {!originalImage ? (
+                  <ImageUploader onImageSelect={handleImageSelect} />
+                ) : (
+                  <div className="space-y-4 w-full">
+                    <div className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700">
+                      <img
+                        src={originalImage}
+                        alt="Original"
+                        className="w-full h-full object-contain"
+                      />
                     </div>
-                  )}
-                </div>
-              </Card>
-            </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                      Imagen original cargada
+                    </div>
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={handleReset}
+                      disabled={isProcessing}
+                    >
+                      <RotateCcw className="w-4 h-4 mr-2" />
+                      Cargar otra imagen
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </Card>
 
-            {/* Right Column - Results */}
-            <div className="lg:col-span-2">
+            {originalImage && (
+              <>
+                <UpscaleControls
+                  scale={scale}
+                  onScaleChange={setScale}
+                  model={model}
+                  onModelChange={setModel}
+                  denoiseStrength={denoiseStrength}
+                  onDenoiseStrengthChange={setDenoiseStrength}
+                  disabled={isProcessing}
+                />
+
+                <Button
+                  className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                  size="lg"
+                  onClick={simulateUpscale}
+                  disabled={isProcessing}
+                >
+                  <Sparkles className="w-5 h-5 mr-2" />
+                  {isProcessing ? "Procesando..." : "Reescalar Imagen"}
+                </Button>
+              </>
+            )}
+          </div>
+
+          {/* Right Column - Results */}
+          <div className="lg:col-span-2">
             <Card className="p-6 dark:bg-gray-800 dark:border-gray-700 min-h-[400px]">
               {!originalImage && !upscaledImage && (
                 <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -364,60 +445,7 @@ export default function App() {
             </Card>
           </div>
         </div>
-
-        {/* Row 2: Controls - Horizontal on large screens, vertical on small */}
-        {originalImage && (
-          <div className="space-y-6">
-            {/* Controls in horizontal layout for lg screens and up */}
-            <div className="hidden lg:block">
-              <UpscaleControls
-                scale={scale}
-                onScaleChange={setScale}
-                model={model}
-                onModelChange={setModel}
-                useRealBackend={useRealBackend}
-                onUseRealBackendChange={setUseRealBackend}
-                disabled={isProcessing}
-                orientation="horizontal"
-              />
-            </div>
-            
-            {/* Controls in vertical layout for screens smaller than lg */}
-            <div className="lg:hidden">
-              <UpscaleControls
-                scale={scale}
-                onScaleChange={setScale}
-                model={model}
-                onModelChange={setModel}
-                useRealBackend={useRealBackend}
-                onUseRealBackendChange={setUseRealBackend}
-                disabled={isProcessing}
-                orientation="vertical"
-              />
-            </div>
-
-            <Button
-              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
-              size="lg"
-              onClick={handleUpscale}
-              disabled={isProcessing}
-            >
-              <Sparkles className="w-5 h-5 mr-2" />
-              {isProcessing ? "Procesando..." : "Reescalar Imagen"}
-            </Button>
-          </div>
-        )}
-      </div>
       </main>
-
-      {/* Onboarding Dialog */}
-      <Onboarding open={showOnboarding} onOpenChange={setShowOnboarding} />
-
-      {/* About Dialog */}
-      <AboutDialog open={showAbout} onOpenChange={setShowAbout} />
-
-      {/* Backend Status Dialog */}
-      <BackendStatusDialog open={showBackendStatus} onOpenChange={setShowBackendStatus} />
     </div>
   );
 }

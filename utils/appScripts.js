@@ -53,15 +53,29 @@ export const upscaleImage = async (
 
   try {
     if (useBackend) {
-      // Intentar usar el backend real
-      console.log("Usando backend de Real-ESRGAN...");
+      // ========================================
+      // MODO BACKEND REAL CON REAL-ESRGAN
+      // ========================================
+      console.log("🚀 Usando backend de Real-ESRGAN...");
       
       // Verificar salud del backend
+      console.log(`🔍 Verificando backend en http://localhost:8000 para modelo: ${model}`);
       const isHealthy = await checkBackendHealth();
       
       if (!isHealthy) {
+        console.error("❌ Backend no disponible en http://localhost:8000");
+        console.log("💡 SOLUCIÓN:");
+        console.log("  1. Abre una terminal en la carpeta 'backend'");
+        console.log("  2. Ejecuta: python main.py");
+        console.log("  3. Si el backend está corriendo pero falla:");
+        console.log("     - Verifica los modelos: python backend/check_models.py");
+        console.log("     - Copia los modelos: python backend/setup.py");
+        console.log("  4. Asegúrate de que los modelos estén en backend/models/");
         throw new Error("Backend no disponible, usando simulación local");
       }
+      
+      console.log("✅ Backend disponible, procesando con Real-ESRGAN...");
+      console.log(`📊 Parámetros: modelo="${model}", escala=${scale}x, denoise=${denoiseStrength}%, tipo="${upscaleType}"`);
       
       // Simular progreso mientras procesa el backend
       const progressInterval = setInterval(() => {
@@ -69,6 +83,8 @@ export const upscaleImage = async (
       }, 500);
       
       try {
+        // LLAMADA REAL AL BACKEND DE REAL-ESRGAN
+        console.log(`🚀 Enviando solicitud al backend con modelo: ${model}`);
         const result = await upscaleWithBackend(originalImage, {
           scale,
           model,
@@ -79,17 +95,41 @@ export const upscaleImage = async (
         clearInterval(progressInterval);
         setProgress(100);
         
+        // IMPORTANTE: Aquí es donde se recibe la imagen real procesada
+        console.log("✅ Respuesta del backend:", {
+          width: result.width,
+          height: result.height,
+          hasImage: !!result.image
+        });
+        
+        // POSIBLE CAUSA DEL "0x0 undefined": 
+        // Si result.width o result.height son undefined/0, hay un problema con el backend
+        if (!result.width || !result.height || !result.image) {
+          console.error("❌ ERROR: El backend devolvió datos incompletos");
+          console.error("Datos recibidos:", result);
+          throw new Error(`Backend devolvió dimensiones inválidas: ${result.width}x${result.height}`);
+        }
+        
         setUpscaledImage(result.image);
         setIsProcessing(false);
         setRenderKey(prev => prev + 1);
         
-        toast.success(`¡Reescalado completado! (${result.width}x${result.height})`);
+        toast.success(`¡Reescalado completado con Real-ESRGAN! (${result.width}x${result.height})`);
       } catch (backendError) {
         clearInterval(progressInterval);
-        console.error("Error del backend:", backendError);
+        console.error("❌ Error del backend Real-ESRGAN:", backendError);
+        console.log("💡 El error puede ser por:");
+        console.log("  - El modelo seleccionado no está disponible");
+        console.log("  - La imagen es demasiado grande");
+        console.log("  - Falta Vulkan o drivers de GPU");
         throw new Error("Backend falló, usando simulación local");
       }
     } else {
+      // ========================================
+      // MODO SIMULACIÓN LOCAL (SIN REAL-ESRGAN)
+      // ========================================
+      console.log("🎨 Usando simulación local (NO es Real-ESRGAN)");
+      
       // Usar simulación local (método anterior)
       await simulateUpscaleLocally(
         originalImage,
@@ -133,6 +173,21 @@ export const upscaleImage = async (
 
 /**
  * Simula el proceso de reescalado de imagen localmente (sin backend)
+ * 
+ * NOTA IMPORTANTE SOBRE EL PROBLEMA "0x0 undefined":
+ * Este es un método de SIMULACIÓN que usa Canvas HTML5 del navegador,
+ * NO es el reescalado real con Real-ESRGAN. 
+ * 
+ * El problema "reescalado exitoso 0x0 undefined" puede ocurrir por:
+ * 1. La imagen no se carga correctamente antes de procesarla
+ * 2. El canvas no tiene dimensiones válidas
+ * 3. El backend Real-ESRGAN no está conectado o devuelve error
+ * 
+ * SOLUCIÓN PARA USAR REAL-ESRGAN REAL:
+ * - Activar el switch "Real-ESRGAN (Backend)" en la interfaz
+ * - Asegurarse de que el backend FastAPI esté ejecutándose (python backend/main.py)
+ * - El backend debe estar en http://localhost:8000
+ * - Los modelos Real-ESRGAN deben estar descargados en backend/models/
  */
 async function simulateUpscaleLocally(
   originalImage,
@@ -152,7 +207,8 @@ async function simulateUpscaleLocally(
 
   console.log("Progreso completado, creando imagen...");
 
-  // In a real app, this would call an AI API
+  // IMPORTANTE: En una aplicación real con Real-ESRGAN, este código NO se usa
+  // Este es solo para demostración cuando el backend no está disponible
   const img = new Image();
   
   // Wait for image to load
@@ -167,6 +223,13 @@ async function simulateUpscaleLocally(
     };
     img.src = originalImage;
   });
+
+  // POSIBLE CAUSA DEL PROBLEMA: Si img.width o img.height son 0, el canvas será 0x0
+  if (!img.width || !img.height) {
+    console.error("⚠️ PROBLEMA DETECTADO: La imagen no tiene dimensiones válidas");
+    console.error("img.width:", img.width, "img.height:", img.height);
+    throw new Error("La imagen no se cargó correctamente. Dimensiones: 0x0");
+  }
 
   const canvas = document.createElement("canvas");
   canvas.width = img.width * scale;
@@ -212,7 +275,8 @@ async function simulateUpscaleLocally(
   setRenderKey(prev => prev + 1);
   
   console.log("Estados actualizados");
-  toast.success("¡Reescalado completado! (simulación local)");
+  // NOTA: Este mensaje muestra "simulación local" porque NO está usando Real-ESRGAN
+  toast.success(`¡Reescalado completado! (simulación local - ${canvas.width}x${canvas.height})`);
 }
 
 /**

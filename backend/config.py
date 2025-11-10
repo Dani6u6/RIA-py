@@ -86,7 +86,7 @@ MAX_IMAGE_SIZE = 4096  # Tamaño máximo en píxeles por lado
 SUPPORTED_FORMATS = ["png", "jpg", "jpeg", "webp", "bmp"]
 
 # Tiempo máximo de procesamiento (segundos)
-PROCESSING_TIMEOUT = 300
+PROCESSING_TIMEOUT = 900
 
 # Configuración de Vulkan
 VULKAN_DEVICE_ID = int(os.getenv("VULKAN_DEVICE_ID", 0))  # ID de GPU a usar
