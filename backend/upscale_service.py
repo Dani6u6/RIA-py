@@ -1,6 +1,7 @@
 """
 Servicio de reescalado usando Real-ESRGAN con Vulkan
 Maneja el procesamiento de imágenes a través del binario de Real-ESRGAN
+Ahora usa un hilo independiente para no bloquear la interfaz de usuario.
 """
 
 import subprocess
@@ -10,6 +11,7 @@ from pathlib import Path
 from typing import Optional, Tuple
 import uuid
 from PIL import Image
+from concurrent.futures import ThreadPoolExecutor, Future
 
 from config import (
     BINARIES_DIR,
@@ -29,10 +31,12 @@ logger = logging.getLogger(__name__)
 class RealESRGANService:
     """Servicio para procesar imágenes con Real-ESRGAN"""
     
-    def __init__(self):
+    def __init__(self, max_workers: int = 2):
         self.system = self._detect_system()
         self.executable = self._get_executable_path()
         self._verify_setup()
+        # Executor para hilos independientes
+        self.executor = ThreadPoolExecutor(max_workers=max_workers)
     
     def _detect_system(self) -> str:
         """Detecta el sistema operativo"""
@@ -93,28 +97,18 @@ class RealESRGANService:
         except Exception as e:
             raise ValueError(f"Error al validar imagen: {str(e)}")
     
-    def upscale(
+    def _upscale_task(
         self,
         input_path: Path,
-        scale: int = 2,
-        model: str = "general",
-        denoise_strength: float = 0.5,
-        tile_size: int = 0,
-        face_enhance: bool = False
+        scale: int,
+        model: str,
+        denoise_strength: float,
+        tile_size: int,
+        face_enhance: bool
     ) -> Path:
         """
-        Reescala una imagen usando Real-ESRGAN
-        
-        Args:
-            input_path: Ruta a la imagen de entrada
-            scale: Factor de escala (2, 3, o 4)
-            model: Modelo a usar ('general', 'anime', 'photo')
-            denoise_strength: Fuerza de denoise (0.0 a 1.0, -1 para desactivar)
-            tile_size: Tamaño de tile para procesamiento (0 para automático)
-            face_enhance: Habilitar mejora de rostros (requiere GFPGAN)
-        
-        Returns:
-            Path: Ruta al archivo de salida
+        Tarea interna de upscale ejecutada en hilo separado.
+        Maneja la lógica de procesamiento sin bloquear.
         """
         try:
             # Validar imagen de entrada
@@ -181,6 +175,42 @@ class RealESRGANService:
             logger.error(f"Error en upscale: {str(e)}")
             raise
     
+    def upscale(
+        self,
+        input_path: Path,
+        scale: int = 2,
+        model: str = "general",
+        denoise_strength: float = 0.5,
+        tile_size: int = 0,
+        face_enhance: bool = False
+    ) -> Future[Path]:
+        """
+        Reescala una imagen usando Real-ESRGAN en un hilo independiente
+        
+        Args:
+            input_path: Ruta a la imagen de entrada
+            scale: Factor de escala (2, 3, o 4)
+            model: Modelo a usar ('general', 'anime', 'photo')
+            denoise_strength: Fuerza de denoise (0.0 a 1.0, -1 para desactivar)
+            tile_size: Tamaño de tile para procesamiento (0 para automático)
+            face_enhance: Habilitar mejora de rostros (requiere GFPGAN)
+        
+        Returns:
+            Future[Path]: Objeto Future que se resuelve con la ruta al archivo de salida.
+                          Usa future.result() para obtener el Path cuando esté listo.
+        """
+        # Enviar la tarea al executor en un hilo separado
+        future = self.executor.submit(
+            self._upscale_task,
+            input_path,
+            scale,
+            model,
+            denoise_strength,
+            tile_size,
+            face_enhance
+        )
+        return future
+    
     def cleanup_temp_files(self, max_age_hours: int = 24):
         """
         Limpia archivos temporales antiguos
@@ -225,6 +255,10 @@ class RealESRGANService:
                 })
         
         return available
+    
+    def shutdown(self):
+        """Cierra el executor de hilos (llamar al salir de la app)"""
+        self.executor.shutdown(wait=True)
 
 
 # Instancia global del servicio
