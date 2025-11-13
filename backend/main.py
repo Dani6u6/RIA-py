@@ -1,6 +1,7 @@
 """
 Backend de rIA usando FastAPI y Real-ESRGAN con Vulkan
 API para reescalado de imágenes con IA
+Ahora con procesamiento asíncrono para no bloquear el servidor.
 """
 
 from fastapi import FastAPI, File, UploadFile, HTTPException, BackgroundTasks
@@ -14,6 +15,7 @@ from PIL import Image
 import logging
 from pathlib import Path
 import uuid
+import asyncio  # Añadido para asincronía
 
 from config import (
     API_HOST,
@@ -36,7 +38,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="rIA Backend API",
     version="1.0.0",
-    description="API de reescalado de imágenes con Real-ESRGAN"
+    description="API de reescalado de imágenes con Real-ESRGAN (asíncrona)"
 )
 
 # Configurar CORS para permitir peticiones desde Electron
@@ -96,6 +98,14 @@ async def startup_event():
         logger.warning("La API se iniciará pero puede no funcionar correctamente")
 
 
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Evento de cierre para limpiar recursos"""
+    service = get_upscale_service()
+    service.shutdown()  # Cerrar el executor de hilos
+    logger.info("Servicio de upscale cerrado")
+
+
 @app.get("/")
 async def root():
     """Endpoint raíz"""
@@ -153,7 +163,7 @@ async def upscale_image(
     background_tasks: BackgroundTasks
 ):
     """
-    Endpoint principal para reescalar imágenes usando Real-ESRGAN
+    Endpoint principal para reescalar imágenes usando Real-ESRGAN (asíncrono)
     """
     import time
     start_time = time.time()
@@ -199,14 +209,17 @@ async def upscale_image(
         # Convertir denoise_strength de 0-100 a 0-1
         denoise = request.denoise_strength / 100.0
         
-        # Procesar imagen con Real-ESRGAN
-        output_path = service.upscale(
+        # Procesar imagen con Real-ESRGAN en hilo separado (no bloqueante)
+        future = service.upscale(
             input_path=temp_input_path,
             scale=request.scale,
             model=request.model,
             denoise_strength=denoise,
             tile_size=request.tile_size
         )
+        
+        # Esperar el resultado de forma asíncrona sin bloquear el event loop
+        output_path = await asyncio.wrap_future(future)
         
         logger.info(f"Upscale completado: {output_path}")
         
@@ -258,7 +271,7 @@ async def upscale_file(
     background_tasks: BackgroundTasks = None
 ):
     """
-    Endpoint alternativo que acepta archivos directamente
+    Endpoint alternativo que acepta archivos directamente (asíncrono)
     """
     temp_input_path = None
     output_path = None
@@ -286,12 +299,15 @@ async def upscale_file(
         service = get_upscale_service()
         denoise = denoise_strength / 100.0
         
-        output_path = service.upscale(
+        future = service.upscale(
             input_path=temp_input_path,
             scale=scale,
             model=model,
             denoise_strength=denoise
         )
+        
+        # Esperar resultado asíncronamente
+        output_path = await asyncio.wrap_future(future)
         
         # Programar limpieza
         if background_tasks:
