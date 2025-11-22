@@ -24,6 +24,7 @@ Bienvenido a la documentación completa del proyecto rIA (Reescalado Inteligente
 
 ### 🔗 Integración
 - **[Integration](INTEGRATION.md)** - Integración frontend-backend
+- **[Flujo de Datos](FLUJO_DE_DATOS.md)** - Esquema completo del flujo de datos desde entrada hasta salida
 - **[Cambios TypeScript a JavaScript](CAMBIOS_TYPESCRIPT_A_JAVASCRIPT.md)** - Migración TS → JS
 
 ### 🎨 Diseño e Interfaz
@@ -72,6 +73,7 @@ Bienvenido a la documentación completa del proyecto rIA (Reescalado Inteligente
 | Instalar el proyecto | [INSTALACION.md](INSTALACION.md) |
 | Configurar el backend | [backend/INICIO_RAPIDO.md](backend/INICIO_RAPIDO.md) |
 | Solucionar errores del backend | [DIAGNOSTICO_BACKEND.md](DIAGNOSTICO_BACKEND.md) |
+| Entender el flujo de datos | [FLUJO_DE_DATOS.md](FLUJO_DE_DATOS.md) |
 | Entender Tailwind v4.0 | [TAILWIND_CONFIG.md](TAILWIND_CONFIG.md) |
 | Configurar Electron | [ELECTRON_PYTHON_SETUP.md](ELECTRON_PYTHON_SETUP.md) |
 | Ver cambios recientes | [CAMBIOS_RECIENTES.md](CAMBIOS_RECIENTES.md) |
@@ -102,6 +104,7 @@ Bienvenido a la documentación completa del proyecto rIA (Reescalado Inteligente
 ├── AUMENTAR_TIMEOUT.md                    # Timeouts
 │
 ├── INTEGRATION.md                         # Frontend-Backend
+├── FLUJO_DE_DATOS.md                      # Esquema de flujo de datos
 ├── CAMBIOS_TYPESCRIPT_A_JAVASCRIPT.md     # Migración TS → JS
 │
 ├── LAYOUT_RESPONSIVO.md                   # Layout responsive
