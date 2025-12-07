@@ -14,6 +14,11 @@ pydantic==2.10.6
 # Utilities
 python-dotenv==1.0.0
 
+# Métricas de calidad de imagen (implementación simplificada)
+scipy==1.11.4  # Para cálculos estadísticos en NIQE
+opencv-python==4.10.0.84
+numpy==1.26.4
+
 # Nota: Real-ESRGAN se ejecuta como binario externo (ncnn-vulkan)
 # No se requiere instalar torch, torchvision u otras dependencias pesadas
 # El binario ya incluye todo lo necesario para ejecutar los modelos

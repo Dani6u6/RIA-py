@@ -16,7 +16,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./components/ui/dropdown-menu";
-import { Sparkles, Download, RotateCcw, Settings2, Moon, Sun, Server, HelpCircle, Info } from "lucide-react";
+import {
+  Sparkles,
+  Download,
+  RotateCcw,
+  Settings2,
+  Moon,
+  Sun,
+  Server,
+  HelpCircle,
+  Info,
+} from "lucide-react";
 import LogoRia from "./components/img/logoria2.svg";
 import { toast } from "sonner";
 import {
@@ -38,17 +48,21 @@ export default function App() {
   const [progress, setProgress] = useState(0);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [renderKey, setRenderKey] = useState(0);
-  
+
   // Controls state
   const [scale, setScale] = useState(2);
   const [model, setModel] = useState("general");
   const [useRealBackend, setUseRealBackend] = useState(false);
-  
+
+  // NIQE metrics state
+  const [niqeScore, setNiqeScore] = useState(null);
+  const [qualityRating, setQualityRating] = useState(null);
+
   // Settings state
   const [outputPath, setOutputPath] = useState("~/Downloads");
   const [upscaleType, setUpscaleType] = useState("AI Enhanced");
   const [outputSize, setOutputSize] = useState("Auto");
-  
+
   // Onboarding and dialogs state
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
@@ -61,7 +75,10 @@ export default function App() {
 
   // Debug effects
   useEffect(() => {
-    console.log("useEffect - upscaledImage cambió:", upscaledImage ? "SÍ TIENE VALOR" : "NO TIENE VALOR");
+    console.log(
+      "useEffect - upscaledImage cambió:",
+      upscaledImage ? "SÍ TIENE VALOR" : "NO TIENE VALOR"
+    );
   }, [upscaledImage]);
 
   useEffect(() => {
@@ -84,7 +101,9 @@ export default function App() {
       setProgress,
       setUpscaledImage,
       setRenderKey,
-      useRealBackend
+      useRealBackend,
+      setNiqeScore,
+      setQualityRating
     );
   };
 
@@ -94,6 +113,8 @@ export default function App() {
 
   const handleReset = () => {
     handleResetScript(setOriginalImage, setUpscaledImage, setProgress);
+    setNiqeScore(null);
+    setQualityRating(null);
   };
 
   const handleResetSettings = () => {
@@ -107,13 +128,19 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <img src={LogoRia} alt="rIA Logo" className="w-10 h-10 rounded-lg" />
+              <img
+                src={LogoRia}
+                alt="rIA Logo"
+                className="w-10 h-10 rounded-lg"
+              />
               <div>
                 <h1 className="text-gray-900 dark:text-white">rIA</h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Reescalado inteligente de imágenes</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Reescalado inteligente de imágenes
+                </p>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-3">
               {/* Backend Status Button */}
               <Button
@@ -167,12 +194,12 @@ export default function App() {
                 <DropdownMenuContent align="end" className="w-64">
                   <DropdownMenuLabel>Configuración General</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  
+
                   <div className="p-2 space-y-4">
                     {/* Upscale Type */}
                     <div className="space-y-2">
                       <Label className="text-xs">Tipo de Reescalado</Label>
-                      <select 
+                      <select
                         className="w-full px-3 py-2 bg-background border border-border rounded-md text-sm"
                         value={upscaleType}
                         onChange={(e) => {
@@ -190,7 +217,7 @@ export default function App() {
                     {/* Output Size */}
                     <div className="space-y-2">
                       <Label className="text-xs">Tamaño de Salida</Label>
-                      <select 
+                      <select
                         className="w-full px-3 py-2 bg-background border border-border rounded-md text-sm"
                         value={outputSize}
                         onChange={(e) => {
@@ -219,7 +246,7 @@ export default function App() {
                   </div>
 
                   <DropdownMenuSeparator />
-                  
+
                   <DropdownMenuItem onClick={handleResetSettings}>
                     Restablecer valores predeterminados
                   </DropdownMenuItem>
@@ -270,144 +297,169 @@ export default function App() {
 
             {/* Right Column - Results */}
             <div className="lg:col-span-2">
-            <Card className="p-6 dark:bg-gray-800 dark:border-gray-700 min-h-[400px]">
-              {!originalImage && !upscaledImage && (
-                <div className="flex flex-col items-center justify-center py-20 text-center">
-                  <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
-                    <Sparkles className="w-10 h-10 text-gray-400 dark:text-gray-500" />
-                  </div>
-                  <h2 className="text-gray-900 dark:text-white mb-2">Comienza cargando una imagen</h2>
-                  <p className="text-gray-500 dark:text-gray-400 max-w-md">
-                    Sube una imagen en el panel izquierdo para comenzar el proceso de reescalado con IA
-                  </p>
-                </div>
-              )}
-
-              {isProcessing && (
-                <div className="space-y-4 py-20">
-                  <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full mb-4 animate-pulse">
-                      <Sparkles className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+              <Card className="p-6 dark:bg-gray-800 dark:border-gray-700 min-h-[400px]">
+                {!originalImage && !upscaledImage && (
+                  <div className="flex flex-col items-center justify-center py-20 text-center">
+                    <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
+                      <Sparkles className="w-10 h-10 text-gray-400 dark:text-gray-500" />
                     </div>
-                    <h3 className="text-gray-900 dark:text-white mb-2">Procesando con IA</h3>
-                    <p className="text-gray-500 dark:text-gray-400">
-                      Aplicando modelo <strong>{model}</strong> con escala {scale}x
-                    </p>
-                    <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
-                      Tipo: {upscaleType} | Tamaño: {outputSize}
+                    <h2 className="text-gray-900 dark:text-white mb-2">
+                      Comienza cargando una imagen
+                    </h2>
+                    <p className="text-gray-500 dark:text-gray-400 max-w-md">
+                      Sube una imagen en el panel izquierdo para comenzar el
+                      proceso de reescalado con IA
                     </p>
                   </div>
-                  <Progress value={progress} className="w-full" />
-                  <p className="text-center text-sm text-gray-600 dark:text-gray-400">{Math.round(progress)}%</p>
-                </div>
-              )}
+                )}
 
-              {(() => {
-                console.log("Condiciones de renderizado:", {
-                  isProcessing,
-                  hasOriginal: !!originalImage,
-                  hasUpscaled: !!upscaledImage,
-                  shouldShow: !isProcessing && originalImage && upscaledImage
-                });
-                return null;
-              })()}
-
-              {!isProcessing && originalImage && upscaledImage && (
-                <div className="space-y-6" key={renderKey}>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h2 className="text-gray-900 dark:text-white">Comparación de Resultados</h2>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Desliza para comparar antes y después
+                {isProcessing && (
+                  <div className="space-y-4 py-20">
+                    <div className="text-center mb-8">
+                      <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full mb-4 animate-pulse">
+                        <Sparkles className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <h3 className="text-gray-900 dark:text-white mb-2">
+                        Procesando con IA
+                      </h3>
+                      <p className="text-gray-500 dark:text-gray-400">
+                        Aplicando modelo <strong>{model}</strong> con escala{" "}
+                        {scale}x
+                      </p>
+                      <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
+                        Tipo: {upscaleType} | Tamaño: {outputSize}
                       </p>
                     </div>
-                    <Button onClick={handleDownload}>
-                      <Download className="w-4 h-4 mr-2" />
-                      Descargar
-                    </Button>
+                    <Progress value={progress} className="w-full" />
+                    <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+                      {Math.round(progress)}%
+                    </p>
                   </div>
+                )}
 
-                  <ImageComparison
-                    key={`comparison-${renderKey}`}
-                    beforeImage={originalImage}
-                    afterImage={upscaledImage}
-                  />
+                {(() => {
+                  console.log("Condiciones de renderizado:", {
+                    isProcessing,
+                    hasOriginal: !!originalImage,
+                    hasUpscaled: !!upscaledImage,
+                    shouldShow: !isProcessing && originalImage && upscaledImage,
+                  });
+                  return null;
+                })()}
 
-                  <div className="grid grid-cols-3 gap-4 pt-4 border-t dark:border-gray-700">
-                    <div className="text-center">
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Modelo usado</p>
-                      <p className="text-gray-900 dark:text-white">{model}</p>
+                {!isProcessing && originalImage && upscaledImage && (
+                  <div className="space-y-6" key={renderKey}>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h2 className="text-gray-900 dark:text-white">
+                          Comparación de Resultados
+                        </h2>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Desliza para comparar antes y después
+                        </p>
+                      </div>
+                      <Button onClick={handleDownload}>
+                        <Download className="w-4 h-4 mr-2" />
+                        Descargar
+                      </Button>
                     </div>
-                    <div className="text-center">
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Factor de escala</p>
-                      <p className="text-gray-900 dark:text-white">{scale}x</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Tipo</p>
-                      <p className="text-gray-900 dark:text-white">{upscaleType}</p>
+
+                    <ImageComparison
+                      key={`comparison-${renderKey}`}
+                      beforeImage={originalImage}
+                      afterImage={upscaledImage}
+                      niqeScore={niqeScore}
+                      qualityRating={qualityRating}
+                    />
+
+                    <div className="grid grid-cols-3 gap-4 pt-4 border-t dark:border-gray-700">
+                      <div className="text-center">
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                          Modelo usado
+                        </p>
+                        <p className="text-gray-900 dark:text-white">{model}</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                          Factor de escala
+                        </p>
+                        <p className="text-gray-900 dark:text-white">
+                          {scale}x
+                        </p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                          Tipo
+                        </p>
+                        <p className="text-gray-900 dark:text-white">
+                          {upscaleType}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {!isProcessing && originalImage && !upscaledImage && (
-                <div className="flex flex-col items-center justify-center py-20 text-center">
-                  <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-full flex items-center justify-center mb-4">
-                    <Sparkles className="w-10 h-10 text-blue-600 dark:text-blue-400" />
+                {!isProcessing && originalImage && !upscaledImage && (
+                  <div className="flex flex-col items-center justify-center py-20 text-center">
+                    <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-full flex items-center justify-center mb-4">
+                      <Sparkles className="w-10 h-10 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <h2 className="text-gray-900 dark:text-white mb-2">
+                      Listo para reescalar
+                    </h2>
+                    <p className="text-gray-500 dark:text-gray-400 max-w-md">
+                      Configura los parámetros y haz clic en "Reescalar Imagen"
+                      para comenzar
+                    </p>
                   </div>
-                  <h2 className="text-gray-900 dark:text-white mb-2">Listo para reescalar</h2>
-                  <p className="text-gray-500 dark:text-gray-400 max-w-md">
-                    Configura los parámetros y haz clic en "Reescalar Imagen" para comenzar
-                  </p>
-                </div>
-              )}
-            </Card>
+                )}
+              </Card>
+            </div>
           </div>
+
+          {/* Row 2: Controls - Horizontal on large screens, vertical on small */}
+          {originalImage && (
+            <div className="space-y-6">
+              {/* Controls in horizontal layout for lg screens and up */}
+              <div className="hidden lg:block">
+                <UpscaleControls
+                  scale={scale}
+                  onScaleChange={setScale}
+                  model={model}
+                  onModelChange={setModel}
+                  useRealBackend={useRealBackend}
+                  onUseRealBackendChange={setUseRealBackend}
+                  disabled={isProcessing}
+                  orientation="horizontal"
+                />
+              </div>
+
+              {/* Controls in vertical layout for screens smaller than lg */}
+              <div className="lg:hidden">
+                <UpscaleControls
+                  scale={scale}
+                  onScaleChange={setScale}
+                  model={model}
+                  onModelChange={setModel}
+                  useRealBackend={useRealBackend}
+                  onUseRealBackendChange={setUseRealBackend}
+                  disabled={isProcessing}
+                  orientation="vertical"
+                />
+              </div>
+
+              <Button
+                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                size="lg"
+                onClick={handleUpscale}
+                disabled={isProcessing}
+              >
+                <Sparkles className="w-5 h-5 mr-2" />
+                {isProcessing ? "Procesando..." : "Reescalar Imagen"}
+              </Button>
+            </div>
+          )}
         </div>
-
-        {/* Row 2: Controls - Horizontal on large screens, vertical on small */}
-        {originalImage && (
-          <div className="space-y-6">
-            {/* Controls in horizontal layout for lg screens and up */}
-            <div className="hidden lg:block">
-              <UpscaleControls
-                scale={scale}
-                onScaleChange={setScale}
-                model={model}
-                onModelChange={setModel}
-                useRealBackend={useRealBackend}
-                onUseRealBackendChange={setUseRealBackend}
-                disabled={isProcessing}
-                orientation="horizontal"
-              />
-            </div>
-            
-            {/* Controls in vertical layout for screens smaller than lg */}
-            <div className="lg:hidden">
-              <UpscaleControls
-                scale={scale}
-                onScaleChange={setScale}
-                model={model}
-                onModelChange={setModel}
-                useRealBackend={useRealBackend}
-                onUseRealBackendChange={setUseRealBackend}
-                disabled={isProcessing}
-                orientation="vertical"
-              />
-            </div>
-
-            <Button
-              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
-              size="lg"
-              onClick={handleUpscale}
-              disabled={isProcessing}
-            >
-              <Sparkles className="w-5 h-5 mr-2" />
-              {isProcessing ? "Procesando..." : "Reescalar Imagen"}
-            </Button>
-          </div>
-        )}
-      </div>
       </main>
 
       {/* Onboarding Dialog */}
@@ -417,7 +469,10 @@ export default function App() {
       <AboutDialog open={showAbout} onOpenChange={setShowAbout} />
 
       {/* Backend Status Dialog */}
-      <BackendStatusDialog open={showBackendStatus} onOpenChange={setShowBackendStatus} />
+      <BackendStatusDialog
+        open={showBackendStatus}
+        onOpenChange={setShowBackendStatus}
+      />
     </div>
   );
 }
