@@ -69,6 +69,8 @@ class UpscaleResponse(BaseModel):
     width: int
     height: int
     processing_time: Optional[float] = None
+    niqe_score: Optional[float] = None
+    quality_rating: Optional[str] = None
 
 
 class ModelInfo(BaseModel):
@@ -219,7 +221,7 @@ async def upscale_image(
         )
         
         # Esperar el resultado de forma asíncrona sin bloquear el event loop
-        output_path = await asyncio.wrap_future(future)
+        output_path, niqe_score = await asyncio.wrap_future(future)
         
         logger.info(f"Upscale completado: {output_path}")
         
@@ -235,6 +237,14 @@ async def upscale_image(
         processing_time = time.time() - start_time
         logger.info(f"Procesamiento completado en {processing_time:.2f}s")
         
+        # Interpretar score NIQE
+        quality_rating = None
+        if niqe_score is not None:
+            from niqe_service import get_niqe_service
+            niqe_service = get_niqe_service()
+            quality_rating = niqe_service.interpret_score(niqe_score)
+            logger.info(f"Calidad: {quality_rating} (NIQE: {niqe_score:.2f})")
+        
         # Programar limpieza de archivos temporales
         background_tasks.add_task(cleanup_files, temp_input_path, output_path)
         
@@ -244,7 +254,9 @@ async def upscale_image(
             message="Imagen reescalada exitosamente",
             width=new_width,
             height=new_height,
-            processing_time=processing_time
+            processing_time=processing_time,
+            niqe_score=niqe_score,
+            quality_rating=quality_rating
         )
         
     except HTTPException:
@@ -307,7 +319,11 @@ async def upscale_file(
         )
         
         # Esperar resultado asíncronamente
-        output_path = await asyncio.wrap_future(future)
+        output_path, niqe_score = await asyncio.wrap_future(future)
+        
+        # Log NIQE score si está disponible
+        if niqe_score is not None:
+            logger.info(f"NIQE score para archivo: {niqe_score:.2f}")
         
         # Programar limpieza
         if background_tasks:
@@ -355,6 +371,6 @@ if __name__ == "__main__":
         port=API_PORT,
         reload=API_RELOAD,
         log_level="info",
-        timeout_keep_alive=900,  # 15 minutos - evita que uvicorn cierre conexiones largas
+        timeout_keep_alive=2700,  # 45 minutos - evita que uvicorn cierre conexiones largas
         timeout_graceful_shutdown=30  # 30 segundos para shutdown limpio
     )

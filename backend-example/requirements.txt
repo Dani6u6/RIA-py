@@ -4,7 +4,9 @@ uvicorn[standard]==0.34.0
 python-multipart==0.0.20
 pillow==11.1.0
 pydantic==2.10.6
-
+scikit-image==0.24.0
+opencv-python==4.10.0.84
+numpy==1.26.4
 # Para implementación con IA real (opcional, descomentar cuando sea necesario)
 # torch==2.5.1
 # torchvision==0.20.1

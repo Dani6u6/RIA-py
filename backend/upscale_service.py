@@ -105,10 +105,13 @@ class RealESRGANService:
         denoise_strength: float,
         tile_size: int,
         face_enhance: bool
-    ) -> Path:
+    ) -> Tuple[Path, Optional[float]]:
         """
         Tarea interna de upscale ejecutada en hilo separado.
         Maneja la lógica de procesamiento sin bloquear.
+        
+        Returns:
+            Tuple[Path, Optional[float]]: (output_path, niqe_score)
         """
         try:
             # Validar imagen de entrada
@@ -166,7 +169,19 @@ class RealESRGANService:
                 raise RuntimeError("Archivo de salida no generado")
             
             logger.info(f"Upscale exitoso: {output_path}")
-            return output_path
+            
+            # Calcular NIQE score de la imagen procesada
+            niqe_score = None
+            try:
+                from niqe_service import get_niqe_service
+                niqe_service = get_niqe_service()
+                if niqe_service.is_available():
+                    niqe_score = niqe_service.calculate_niqe(output_path)
+                    logger.info(f"NIQE score: {niqe_score}")
+            except Exception as e:
+                logger.warning(f"No se pudo calcular NIQE: {str(e)}")
+            
+            return output_path, niqe_score
             
         except subprocess.TimeoutExpired:
             logger.error("Timeout al procesar imagen")
@@ -174,6 +189,7 @@ class RealESRGANService:
         except Exception as e:
             logger.error(f"Error en upscale: {str(e)}")
             raise
+
     
     def upscale(
         self,
@@ -183,7 +199,7 @@ class RealESRGANService:
         denoise_strength: float = 0.5,
         tile_size: int = 0,
         face_enhance: bool = False
-    ) -> Future[Path]:
+    ) -> Future[Tuple[Path, Optional[float]]]:
         """
         Reescala una imagen usando Real-ESRGAN en un hilo independiente
         
@@ -196,8 +212,9 @@ class RealESRGANService:
             face_enhance: Habilitar mejora de rostros (requiere GFPGAN)
         
         Returns:
-            Future[Path]: Objeto Future que se resuelve con la ruta al archivo de salida.
-                          Usa future.result() para obtener el Path cuando esté listo.
+            Future[Tuple[Path, Optional[float]]]: Objeto Future que se resuelve con 
+                                                   (ruta_salida, niqe_score).
+                                                   Usa future.result() para obtener la tupla.
         """
         # Enviar la tarea al executor en un hilo separado
         future = self.executor.submit(

@@ -8,6 +8,7 @@ Aplicación de escritorio para reescalado de imágenes usando IA, construida con
 - 🔄 Comparación interactiva antes/después con slider draggable
 - 🔍 Zoom + Pan para inspección detallada
 - ⚙️ Controles configurables (escala, modelo IA)
+- 📊 **Métricas NIQE de calidad automáticas** (con backend)
 - 🌓 Modo oscuro
 - 📊 Barra de progreso en tiempo real
 - 💾 Descarga de imágenes procesadas
@@ -72,18 +73,20 @@ python main.py         # Inicia el servidor
 1. **Activar Backend** (opcional):
    - Inicia el backend: `cd backend && python main.py`
    - En la app, activa el switch "Real-ESRGAN (Backend)" en UpscaleControls
-   
 2. **Cargar imagen**: Arrastra y suelta o haz clic en "Seleccionar imagen"
 
 3. **Configurar parámetros**:
+
    - Modelo de IA (General, Anime, Anime Video 2x/3x/4x)
    - Factor de escala (2x, 3x, 4x)
 
 4. **Procesar**: Haz clic en "Reescalar Imagen"
+
    - Con backend: Procesamiento real con IA
    - Sin backend: Simulación local en el navegador
 
-5. **Comparar**: 
+5. **Comparar**:
+
    - Arrastra el círculo blanco para comparar antes/después
    - Usa los botones de zoom para inspeccionar detalles
    - Con zoom activo, arrastra la imagen para navegar
@@ -101,17 +104,20 @@ python main.py         # Inicia el servidor
 ## 📚 Documentación
 
 ### 📖 General
+
 - **[Índice de Documentación](docs/README.md)** - Punto de entrada a toda la documentación
 - **[Instalación](docs/INSTALACION.md)** - Guía completa de instalación
 - **[Checklist](docs/CHECKLIST.md)** - Lista de verificación del proyecto
 - **[Cambios Recientes](docs/CAMBIOS_RECIENTES.md)** - Últimas actualizaciones
 
 ### 🎨 Interfaz
+
 - **[Interfaz Compactada](docs/INTERFAZ_COMPACTADA.md)** - UI 50% más compacta (v32)
 - **[Mejoras Image Comparison](docs/MEJORAS_IMAGE_COMPARISON.md)** - Handle draggable + Pan con zoom
 - **[Layout Responsivo](docs/LAYOUT_RESPONSIVO.md)** - Sistema responsive
 
 ### 🔌 Backend
+
 - **[Backend - Inicio Rápido](docs/backend/INICIO_RAPIDO.md)** - Guía de 3 pasos
 - **[Backend - README](docs/backend/README.md)** - Documentación completa
 - **[Backend - Modelos](docs/backend/MODELOS.md)** - Modelos de IA disponibles
@@ -119,24 +125,28 @@ python main.py         # Inicia el servidor
 - **[Diagnóstico Backend](docs/DIAGNOSTICO_BACKEND.md)** - Solución de problemas
 
 ### ⚙️ Configuración
+
 - **[Configuración Completa](docs/CONFIGURACION_COMPLETA.md)** - Todas las configuraciones
 - **[Tailwind Config](docs/TAILWIND_CONFIG.md)** - Tailwind CSS v4.0 (sin config file)
 - **[Electron + Python](docs/ELECTRON_PYTHON_SETUP.md)** - Setup de Electron
 - **[Aumentar Timeout](docs/AUMENTAR_TIMEOUT.md)** - Configurar timeouts de procesamiento
 
 ### 🔗 Integración
+
 - **[Integration](docs/INTEGRATION.md)** - Frontend-Backend integration
 - **[Resumen Proyecto](docs/RESUMEN_PROYECTO.md)** - Resumen general
 
 ## 🆕 Novedades - Versión 32
 
 ### ✨ Interfaz 50% Más Compacta
+
 - ✅ Eliminado control de denoise (no funcional con ncnn-vulkan)
 - ✅ Toggle de backend integrado en UpscaleControls
 - ✅ Estado del backend movido a modal accesible desde header
 - ✅ Solo 2 elementos principales en lugar de 4 cards
 
 ### 🎯 Comparador Mejorado
+
 - ✅ **Handle draggable**: Arrastra el círculo blanco para comparar
 - ✅ **Pan con zoom**: Navega la imagen cuando está con zoom
 - ✅ Cursors dinámicos (grab/grabbing/ew-resize)
@@ -144,6 +154,7 @@ python main.py         # Inicia el servidor
 - ✅ Soporte completo touch/móvil
 
 ### 🖥️ Modal de Diagnóstico
+
 - ✅ BackendStatusDialog con troubleshooting integrado
 - ✅ Auto-refresh al abrir
 - ✅ Lista de modelos disponibles
@@ -153,7 +164,7 @@ Ver detalles: [INTERFAZ_COMPACTADA.md](docs/INTERFAZ_COMPACTADA.md) y [MEJORAS_I
 
 ## ⚠️ Importante: Tailwind CSS v4.0
 
-Este proyecto usa **Tailwind CSS v4.0**, que NO requiere `tailwind.config.js`. 
+Este proyecto usa **Tailwind CSS v4.0**, que NO requiere `tailwind.config.js`.
 
 Toda la configuración se maneja en `styles/globals.css` usando la directiva `@theme`.
 
@@ -167,6 +178,7 @@ La aplicación puede funcionar con o sin backend:
 - **Con backend**: Real-ESRGAN con IA real y aceleración GPU
 
 ### Características del Backend:
+
 - ✅ Real-ESRGAN con Vulkan (acelerado por GPU)
 - ✅ Sin PyTorch (usa binarios precompilados ~500MB)
 - ✅ 5 modelos: General, Anime, Anime Video (2x/3x/4x)
