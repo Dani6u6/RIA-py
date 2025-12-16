@@ -29,7 +29,7 @@ const onboardingSteps = [
   {
     title: "1. Carga tu imagen",
     description: "Arrastra y suelta o haz clic para seleccionar",
-    image: "/components/img/subir.png",
+    image: "/components/img/subir2.png",
     content:
       "Acepta formatos PNG, JPG, WEBP y más. Simplemente arrastra tu imagen al área de carga o haz clic para seleccionar desde tu computadora.",
     color: "from-green-500 to-teal-600",
@@ -37,7 +37,7 @@ const onboardingSteps = [
   {
     title: "2. Configura el reescalado",
     description: "Elige el modelo y parámetros",
-    image: "/components/img/config.png",
+    image: "/components/img/config2.png",
     content:
       "Selecciona entre modelos General Purpose, Anime & Arte, o especializados. Ajusta el factor de escala (2x-4x) y la reducción de ruido según tus necesidades.",
     color: "from-orange-500 to-red-600",
@@ -149,7 +149,7 @@ export function Onboarding({ open, onOpenChange }) {
                   <ImageWithFallback
                     src={step.image}
                     alt={step.title}
-                    className="w-full h-full object-fill"
+                    className="w-full h-full object-contain"
                   />
                 </div>
               )}

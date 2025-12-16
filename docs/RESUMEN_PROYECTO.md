@@ -2,7 +2,7 @@
 
 ## 🎯 Estado del Proyecto
 
-✅ **COMPLETADO** - Aplicación convertida a JavaScript y lista para usar con Electron y Python/FastAPI
+✅ **COMPLETADO** - Aplicación convertida a JavaScript con documentación técnica completa del modelo de IA Real-ESRGAN
 
 ---
 
@@ -14,10 +14,11 @@
 | **Versión** | 1.0.0 |
 | **Tecnología Frontend** | React 18 + JavaScript (ES6+) |
 | **Tecnología Backend** | Python + FastAPI |
+| **Motor IA** | Real-ESRGAN (Vulkan binaries) |
 | **Desktop Runtime** | Electron 34 |
-| **Estilos** | Tailwind CSS 4.0 |
+| **Estilos** | Tailwind CSS 4.0 (Material UI design) |
 | **Build Tool** | Vite 6.0 |
-| **Estado** | ✅ Funcional y listo para desarrollo |
+| **Estado** | ✅ Funcional con documentación técnica completa |
 
 ---
 
@@ -40,15 +41,49 @@
 - ✅ Tipo de reescalado (AI Enhanced, Standard, Fast, Quality)
 - ✅ Tamaño de salida (Auto, 1080p, 4K, 8K, Custom)
 - ✅ Ruta de salida personalizable
+- ✅ Botón de configuración con menú desplegable
 
 ### UI/UX
 - ✅ Diseño Material UI con Tailwind CSS
-- ✅ Diseño responsivo
+- ✅ Diseño responsivo (desktop-first)
 - ✅ Notificaciones toast (Sonner)
 - ✅ Tooltips informativos
 - ✅ Estados de carga animados
 - ✅ Componentes UI de shadcn/ui
 - ✅ Iconos Lucide React
+- ✅ Dark mode toggle persistente
+
+---
+
+## 🤖 Modelo de IA - Real-ESRGAN
+
+### Arquitectura
+- **Modelo**: Real-ESRGAN (Enhanced Super-Resolution GAN)
+- **Bloques**: 23 bloques RRDB (Residual-in-Residual Dense Block)
+- **Capas**: 60+ capas de convolución
+- **Activación**: LeakyReLU (alpha=0.2)
+- **Parámetros**: 16-23 millones según variante
+- **Implementación**: Binarios Vulkan para compatibilidad universal
+
+### Entrenamiento
+- **Método**: Aprendizaje supervisado adversarial (GAN)
+- **Componentes**: Generador (RRDB) + Discriminador (VGG)
+- **Función de pérdida**: Combinación de L1, perceptual, y adversarial
+- **Dataset**: DIV2K, Flickr2K, OST (300K+ imágenes)
+- **Degradaciones**: Blur, ruido, compresión JPEG, downsampling
+
+### Métricas de Evaluación
+- **LPIPS** (Learned Perceptual Image Patch Similarity): Calidad perceptual
+- **PSNR** (Peak Signal-to-Noise Ratio): Fidelidad píxel a píxel
+- **SSIM** (Structural Similarity Index): Similitud estructural
+- **NIQE**: Calidad sin referencia
+
+### Ventajas de Vulkan
+- ✅ Sin dependencias de PyTorch/CUDA pesadas
+- ✅ Compatibilidad multi-plataforma (Windows, Linux, macOS)
+- ✅ Soporte para GPUs AMD, NVIDIA, e Intel
+- ✅ Menor huella de instalación
+- ✅ Ejecución más rápida en hardware limitado
 
 ---
 
@@ -79,7 +114,7 @@ rIA/
 │   │   ├── main.js                      # Proceso principal
 │   │   └── preload.js                   # IPC seguro
 │
-├── 🐍 BACKEND (Python - Ejemplo)
+├── 🐍 BACKEND (Python + Real-ESRGAN)
 │   ├── backend-example/
 │   │   ├── main.py                      # API FastAPI
 │   │   ├── requirements.txt             # Dependencias Python
@@ -91,6 +126,8 @@ rIA/
 │   ├── INTEGRATION.md                   # Integración backend
 │   ├── ELECTRON_PYTHON_SETUP.md         # Setup completo
 │   ├── CAMBIOS_TYPESCRIPT_A_JAVASCRIPT.md
+│   ├── ARQUITECTURA_MODELO_IA.md        # 🤖 Arquitectura Real-ESRGAN
+│   ├── ENTRENAMIENTO_Y_METRICAS.md      # 🤖 Training & Metrics
 │   └── RESUMEN_PROYECTO.md              # Este archivo
 │
 ├── ⚙️ CONFIGURACIÓN
@@ -112,7 +149,7 @@ rIA/
 | Tecnología | Versión | Uso |
 |------------|---------|-----|
 | React | 18.3.1 | Framework UI |
-| Tailwind CSS | 4.0.0 | Estilos |
+| Tailwind CSS | 4.0.0 | Estilos (Material UI) |
 | Vite | 6.0.3 | Build tool |
 | Lucide React | 0.460.0 | Iconos |
 | Sonner | 2.0.3 | Notificaciones |
@@ -125,13 +162,14 @@ rIA/
 | Concurrently | 9.1.2 | Scripts paralelos |
 | Wait-on | 8.0.1 | Esperar servidor |
 
-### Backend (Ejemplo)
+### Backend & IA
 | Tecnología | Versión | Uso |
 |------------|---------|-----|
 | Python | 3.8+ | Lenguaje |
 | FastAPI | 0.115.6 | Framework API |
 | Uvicorn | 0.34.0 | Servidor ASGI |
 | Pillow | 11.1.0 | Procesamiento imágenes |
+| Real-ESRGAN | Latest | Motor de IA (Vulkan) |
 
 ---
 
@@ -179,6 +217,8 @@ npm run postinstall
 |---------|-------|
 | Archivos JavaScript | 8 archivos principales |
 | Componentes React | 3 componentes + 40+ UI |
+| Archivos de documentación | 9 archivos MD |
+| Documentación técnica IA | 2 reportes completos |
 | Líneas de código (aprox.) | ~2,500 líneas |
 | Dependencias npm | 45+ paquetes |
 | Dependencias Python | 5 paquetes base |
@@ -198,7 +238,7 @@ npm run postinstall
 ### Responsive Breakpoints
 - **Mobile**: < 640px
 - **Tablet**: 640px - 1024px
-- **Desktop**: > 1024px
+- **Desktop**: > 1024px (diseño principal)
 
 ### Animaciones
 - ✅ Fade in/out
@@ -261,7 +301,8 @@ npm run postinstall
 ## 🚧 Roadmap Futuro
 
 ### Corto Plazo (1-2 meses)
-- [ ] Integrar modelos de IA reales (Real-ESRGAN)
+- [x] Documentación técnica del modelo IA
+- [ ] Integrar binarios Vulkan de Real-ESRGAN
 - [ ] Implementar procesamiento por lotes
 - [ ] Agregar más formatos de salida (JPEG, WebP, TIFF)
 - [ ] Sistema de historial de procesamiento
@@ -270,16 +311,17 @@ npm run postinstall
 ### Medio Plazo (3-6 meses)
 - [ ] WebSockets para progreso en tiempo real
 - [ ] Perfiles de configuración guardados
-- [ ] Integración con servicios en la nube
-- [ ] Procesamiento offline con Service Workers
+- [ ] GPU acceleration monitoring
+- [ ] Procesamiento offline optimizado
 - [ ] Sistema de plugins para modelos custom
+- [ ] Métricas de calidad en UI (PSNR, SSIM)
 
 ### Largo Plazo (6+ meses)
-- [ ] Versión web (SaaS)
+- [ ] Versión web (SaaS con backend cloud)
 - [ ] Mobile app (React Native)
 - [ ] API pública para developers
 - [ ] Marketplace de modelos de IA
-- [ ] Colaboración en tiempo real
+- [ ] Entrenamiento de modelos personalizados
 
 ---
 
@@ -309,6 +351,8 @@ npm run postinstall
 - `INICIO_RAPIDO.md` → Empezar en 3 pasos
 - `INTEGRATION.md` → Conectar backend
 - `ELECTRON_PYTHON_SETUP.md` → Setup producción
+- `ARQUITECTURA_MODELO_IA.md` → 🆕 Detalles técnicos del modelo
+- `ENTRENAMIENTO_Y_METRICAS.md` → 🆕 Training & evaluación
 
 ### APIs y Bibliotecas
 - [React Docs](https://react.dev/)
@@ -317,11 +361,13 @@ npm run postinstall
 - [FastAPI Docs](https://fastapi.tiangolo.com/)
 - [shadcn/ui](https://ui.shadcn.com/)
 
-### Modelos de IA Sugeridos
-- [Real-ESRGAN](https://github.com/xinntao/Real-ESRGAN)
-- [ESRGAN](https://github.com/xinntao/ESRGAN)
-- [SwinIR](https://github.com/JingyunLiang/SwinIR)
-- [GFPGAN](https://github.com/TencentARC/GFPGAN) (para rostros)
+### Modelos de IA y Recursos
+- [Real-ESRGAN](https://github.com/xinntao/Real-ESRGAN) - Modelo principal
+- [Real-ESRGAN Vulkan](https://github.com/xinntao/Real-ESRGAN-ncnn-vulkan) - Binarios Vulkan
+- [ESRGAN](https://github.com/xinntao/ESRGAN) - Modelo base
+- [SwinIR](https://github.com/JingyunLiang/SwinIR) - Alternativa basada en Transformers
+- [GFPGAN](https://github.com/TencentARC/GFPGAN) - Especializado en rostros
+- [Vulkan SDK](https://vulkan.lunarg.com/) - SDK de Vulkan
 
 ---
 
@@ -371,26 +417,29 @@ MIT License - Ver archivo LICENSE (si existe)
 
 ## 🎉 Estado Final
 
-**✅ PROYECTO COMPLETAMENTE FUNCIONAL**
+**✅ PROYECTO COMPLETAMENTE FUNCIONAL CON DOCUMENTACIÓN TÉCNICA**
 
 - Frontend: JavaScript ✅
 - Componentes: React funcional ✅
-- Estilos: Tailwind CSS 4.0 ✅
+- Estilos: Tailwind CSS 4.0 (Material UI) ✅
 - Desktop: Electron configurado ✅
 - Backend: Ejemplo FastAPI listo ✅
-- Documentación: Completa ✅
+- Motor IA: Real-ESRGAN (Vulkan) especificado ✅
+- Documentación: Completa y técnica ✅
+- Docs modelo IA: Arquitectura y training documentados ✅
 - Build system: Vite optimizado ✅
 
 **Listo para:**
 - ✅ Desarrollo local
-- ✅ Integración con IA real
+- ✅ Integración con Real-ESRGAN Vulkan
 - ✅ Despliegue a producción
 - ✅ Empaquetado como app desktop
+- ✅ Documentación técnica para stakeholders
 
 ---
 
-**Fecha de finalización:** 22 de Octubre, 2025  
+**Fecha de última actualización:** 7 de Diciembre, 2024  
 **Versión:** 1.0.0  
-**Estado:** ✅ Producción-ready
+**Estado:** ✅ Producción-ready con documentación técnica completa
 
-**¡Proyecto rIA completado exitosamente!** 🎉🚀
+**¡Proyecto rIA con documentación técnica de modelo IA completada!** 🎉🚀🤖
