@@ -11,7 +11,7 @@ import {
   DialogTitle,
 } from "./ui/dialog";
 import { BookOpen, Save, FolderPlus } from "lucide-react";
-import { toast } from "sonner@2.0.3";
+import { toast } from "sonner";
 import { getAllAlbums, createAlbum, saveImageToAlbum } from "../utils/database";
 import { saveImageToAlbumFolder } from "../utils/storage";
 
