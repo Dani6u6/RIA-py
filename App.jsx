@@ -26,6 +26,7 @@ import {
   Server,
   HelpCircle,
   Info,
+  BookOpen,
 } from "lucide-react";
 import LogoRia from "./components/img/logoria2.svg";
 import { toast } from "sonner";
@@ -40,6 +41,8 @@ import {
 import { Onboarding } from "./components/Onboarding";
 import { AboutDialog } from "./components/AboutDialog";
 import { BackendStatusDialog } from "./components/BackendStatusDialog";
+import { AlbumsView } from "./components/AlbumsView";
+import { SaveToAlbumDialog } from "./components/SaveToAlbumDialog";
 
 export default function App() {
   const [originalImage, setOriginalImage] = useState(null);
@@ -67,6 +70,8 @@ export default function App() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [showBackendStatus, setShowBackendStatus] = useState(false);
+  const [showAlbums, setShowAlbums] = useState(false);
+  const [showSaveToAlbum, setShowSaveToAlbum] = useState(false);
 
   // Dark mode effect
   useEffect(() => {
@@ -148,8 +153,9 @@ export default function App() {
                 size="icon"
                 onClick={() => setShowBackendStatus(true)}
                 aria-label="Estado del Backend"
+                className="[&_svg]:!size-5"
               >
-                <Server className="w-5 h-5" />
+                <Server />
               </Button>
 
               {/* Help Button */}
@@ -158,8 +164,9 @@ export default function App() {
                 size="icon"
                 onClick={() => setShowOnboarding(true)}
                 aria-label="Ayuda"
+                className="[&_svg]:!size-5"
               >
-                <HelpCircle className="w-5 h-5" />
+                <HelpCircle />
               </Button>
 
               {/* About Button */}
@@ -168,8 +175,20 @@ export default function App() {
                 size="icon"
                 onClick={() => setShowAbout(true)}
                 aria-label="Acerca de"
+                className="[&_svg]:!size-5"
               >
-                <Info className="w-5 h-5" />
+                <Info />
+              </Button>
+
+              {/* Albums Button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowAlbums(true)}
+                aria-label="Álbumes"
+                className="[&_svg]:!size-5"
+              >
+                <BookOpen />
               </Button>
 
               {/* Dark Mode Toggle */}
@@ -349,7 +368,7 @@ export default function App() {
 
                 {!isProcessing && originalImage && upscaledImage && (
                   <div className="space-y-6" key={renderKey}>
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
                       <div>
                         <h2 className="text-gray-900 dark:text-white">
                           Comparación de Resultados
@@ -358,10 +377,19 @@ export default function App() {
                           Desliza para comparar antes y después
                         </p>
                       </div>
-                      <Button onClick={handleDownload}>
-                        <Download className="w-4 h-4 mr-2" />
-                        Descargar
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => setShowSaveToAlbum(true)}
+                        >
+                          <BookOpen className="w-4 h-4 mr-2" />
+                          Guardar en Álbum
+                        </Button>
+                        <Button onClick={handleDownload}>
+                          <Download className="w-4 h-4 mr-2" />
+                          Descargar
+                        </Button>
+                      </div>
                     </div>
 
                     <ImageComparison
@@ -472,6 +500,17 @@ export default function App() {
       <BackendStatusDialog
         open={showBackendStatus}
         onOpenChange={setShowBackendStatus}
+      />
+
+      {/* Albums View */}
+      <AlbumsView open={showAlbums} onOpenChange={setShowAlbums} />
+
+      {/* Save to Album Dialog */}
+      <SaveToAlbumDialog
+        open={showSaveToAlbum}
+        onOpenChange={setShowSaveToAlbum}
+        originalImage={originalImage}
+        upscaledImage={upscaledImage}
       />
     </div>
   );
