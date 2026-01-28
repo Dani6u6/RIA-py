@@ -16,30 +16,30 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { 
-  BookOpen, 
-  FolderPlus, 
-  Search, 
-  Grid, 
+import {
+  BookOpen,
+  FolderPlus,
+  Search,
+  Grid,
   List,
   MoreVertical,
   Trash2,
   Edit,
   Image as ImageIcon,
-  X
 } from "lucide-react";
 import { toast } from "sonner";
-import { 
-  getAllAlbums, 
-  getAlbumImages, 
-  deleteAlbum, 
+import {
+  getAllAlbums,
+  getAlbumImages,
+  deleteAlbum,
   deleteImage,
   searchImages,
-  createAlbum
+  createAlbum,
+  updateAlbum,
 } from "../utils/database";
 import { readImageAsBase64 } from "../utils/storage";
 
-export function AlbumsView({ open, onOpenChange }) {
+export function AlbumsView({ open, onOpenChange, refreshTrigger }) {
   const [selectedAlbum, setSelectedAlbum] = useState(null);
   const [albums, setAlbums] = useState([]);
   const [images, setImages] = useState([]);
@@ -60,20 +60,38 @@ export function AlbumsView({ open, onOpenChange }) {
     "Familiar",
     "Urbana",
     "Natural",
-    "Otra"
+    "Otra",
   ];
 
   useEffect(() => {
     // Cargar álbumes desde MySQL
     const fetchAlbums = async () => {
-      const albumsData = await getAllAlbums();
-      setAlbums(albumsData);
-      if (albumsData.length > 0) {
-        setSelectedAlbum(albumsData[0]);
+      try {
+        const albumsData = await getAllAlbums();
+        setAlbums(albumsData);
+
+        // Si ya hay un álbum seleccionado, intentar mantenerlo
+        if (selectedAlbum) {
+          const current = albumsData.find((a) => a.id === selectedAlbum.id);
+          if (current) {
+            setSelectedAlbum(current);
+          } else if (albumsData.length > 0) {
+            setSelectedAlbum(albumsData[0]);
+          } else {
+            setSelectedAlbum(null);
+          }
+        }
+        // Si no hay seleccionado pero hay álbumes, seleccionar el primero
+        else if (albumsData.length > 0) {
+          setSelectedAlbum(albumsData[0]);
+        }
+      } catch (error) {
+        console.error("Error fetching albums:", error);
       }
     };
     fetchAlbums();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshTrigger]);
 
   useEffect(() => {
     if (selectedAlbum) {
@@ -81,7 +99,7 @@ export function AlbumsView({ open, onOpenChange }) {
       const fetchImages = async () => {
         const imagesData = await getAlbumImages(selectedAlbum.id);
         setImages(imagesData);
-        
+
         /* LÓGICA PARA ACTUALIZAR COVER DEL ÁLBUM CON LA PRIMERA IMAGEN:
         
         // Al cargar las imágenes del álbum desde MySQL
@@ -89,8 +107,8 @@ export function AlbumsView({ open, onOpenChange }) {
         setImages(albumImages);
         
         // Si el álbum tiene imágenes pero no tiene cover, usar la primera imagen
-        if (albumImages.length > 0 && !selectedAlbum.coverImage) {
-          const firstImageCover = albumImages[0].upscaledImage;
+        if (albumImages.length > 0 && !selectedAlbum.coverImagePath) {
+          const firstImageCover = albumImages[0].upscaledPath;
           
           // Actualizar en MySQL
           await updateAlbumCover(selectedAlbum.id, firstImageCover);
@@ -98,22 +116,22 @@ export function AlbumsView({ open, onOpenChange }) {
           // Actualizar estado local
           const updatedAlbums = albums.map(album => 
             album.id === selectedAlbum.id 
-              ? { ...album, coverImage: firstImageCover }
+              ? { ...album, coverImagePath: firstImageCover }
               : album
           );
           setAlbums(updatedAlbums);
-          setSelectedAlbum({ ...selectedAlbum, coverImage: firstImageCover });
+          setSelectedAlbum({ ...selectedAlbum, coverImagePath: firstImageCover });
         }
         
         // Al guardar una nueva imagen desde SaveToAlbumDialog.jsx:
         // 1. Insertar imagen en MySQL con albumId
-        // 2. Si es la primera imagen del álbum, actualizar coverImage del álbum
+        // 2. Si es la primera imagen del álbum, actualizar coverImagePath del álbum
         // 3. Incrementar imageCount del álbum
         
         const savedImage = await saveImageToAlbum(albumId, imageData);
         
         if (album.imageCount === 0) {
-          await updateAlbumCover(albumId, savedImage.upscaledImage);
+          await updateAlbumCover(albumId, savedImage.upscaledPath);
           await updateAlbumCount(albumId, 1);
         }
         */
@@ -122,92 +140,102 @@ export function AlbumsView({ open, onOpenChange }) {
     }
   }, [selectedAlbum]);
 
-  const handleCreateAlbum = () => {
+  const handleCreateAlbum = async () => {
     if (!newAlbumName.trim()) {
       toast.error("Por favor ingresa un nombre para el álbum");
       return;
     }
 
-    // Aquí se guardaría en MySQL
-    const newAlbum = {
-      id: albums.length + 1,
-      name: newAlbumName,
-      imageCount: 0,
-      coverImage: null,
-      createdAt: new Date()
-    };
+    try {
+      const albumId = await createAlbum(newAlbumName.trim());
 
-    setAlbums([...albums, newAlbum]);
-    setSelectedAlbum(newAlbum);
-    setNewAlbumName("");
-    setShowCreateAlbum(false);
-    toast.success(`Álbum "${newAlbumName}" creado exitosamente`);
-  };
-
-  const handleEditAlbum = () => {
-    if (!newAlbumName.trim()) {
-      toast.error("Por favor ingresa un nombre para el álbum");
-      return;
-    }
-
-    // Aquí se actualizaría en MySQL
-    const updatedAlbums = albums.map(album => 
-      album.id === editingAlbum.id 
-        ? { ...album, name: newAlbumName }
-        : album
-    );
-
-    setAlbums(updatedAlbums);
-    if (selectedAlbum?.id === editingAlbum.id) {
-      setSelectedAlbum({ ...selectedAlbum, name: newAlbumName });
-    }
-    setNewAlbumName("");
-    setShowEditAlbum(false);
-    setEditingAlbum(null);
-    toast.success("Álbum actualizado exitosamente");
-  };
-
-  const handleDeleteAlbum = (albumId) => {
-    // Aquí se eliminaría de MySQL
-    const updatedAlbums = albums.filter(album => album.id !== albumId);
-    setAlbums(updatedAlbums);
-    if (selectedAlbum?.id === albumId) {
-      setSelectedAlbum(updatedAlbums.length > 0 ? updatedAlbums[0] : null);
-    }
-    toast.success("Álbum eliminado exitosamente");
-  };
-
-  const handleDeleteImage = (imageId) => {
-    // Aquí se eliminaría de MySQL
-    const updatedImages = images.filter(img => img.id !== imageId);
-    setImages(updatedImages);
-    
-    // LÓGICA: Actualizar el cover del álbum si se eliminó la primera imagen
-    // Si la imagen eliminada era la primera, actualizar el cover con la nueva primera imagen
-    /* IMPLEMENTACIÓN FUTURA CON MYSQL:
-    if (selectedAlbum && images[0]?.id === imageId) {
-      const newCoverImage = updatedImages.length > 0 ? updatedImages[0].upscaledImage : null;
-      
-      // Actualizar en MySQL
-      await updateAlbumCover(selectedAlbum.id, newCoverImage);
-      
-      // Actualizar estado local
-      const updatedAlbums = albums.map(album => 
-        album.id === selectedAlbum.id 
-          ? { ...album, coverImage: newCoverImage, imageCount: updatedImages.length }
-          : album
-      );
+      // Recargar álbumes
+      const updatedAlbums = await getAllAlbums();
       setAlbums(updatedAlbums);
-      setSelectedAlbum({ ...selectedAlbum, coverImage: newCoverImage, imageCount: updatedImages.length });
+
+      const newAlbum = updatedAlbums.find((a) => a.id === albumId);
+      if (newAlbum) setSelectedAlbum(newAlbum);
+
+      setNewAlbumName("");
+      setShowCreateAlbum(false);
+      toast.success(`Álbum "${newAlbumName}" creado exitosamente`);
+    } catch (error) {
+      console.error("Error creating album:", error);
+      toast.error("Error al crear el álbum");
     }
-    */
-    
-    toast.success("Imagen eliminada exitosamente");
   };
 
-  const filteredImages = images.filter(img => {
-    const matchesSearch = img.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = filterCategory === "all" || img.category === filterCategory;
+  const handleEditAlbum = async () => {
+    if (!newAlbumName.trim()) {
+      toast.error("Por favor ingresa un nombre para el álbum");
+      return;
+    }
+
+    try {
+      await updateAlbum(editingAlbum.id, newAlbumName.trim());
+
+      // Recargar álbumes
+      const updatedAlbums = await getAllAlbums();
+      setAlbums(updatedAlbums);
+
+      // Si el álbum editado es el seleccionado, actualizar su nombre en local
+      if (selectedAlbum?.id === editingAlbum.id) {
+        setSelectedAlbum({ ...selectedAlbum, name: newAlbumName.trim() });
+      }
+
+      setNewAlbumName("");
+      setShowEditAlbum(false);
+      setEditingAlbum(null);
+      toast.success("Álbum actualizado exitosamente");
+    } catch (error) {
+      console.error("Error updating album:", error);
+      toast.error("Error al actualizar el álbum");
+    }
+  };
+
+  const handleDeleteAlbum = async (albumId) => {
+    try {
+      await deleteAlbum(albumId);
+
+      // Recargar y filtrar
+      const updatedAlbums = albums.filter((album) => album.id !== albumId);
+      setAlbums(updatedAlbums);
+
+      if (selectedAlbum?.id === albumId) {
+        setSelectedAlbum(updatedAlbums.length > 0 ? updatedAlbums[0] : null);
+      }
+      toast.success("Álbum eliminado exitosamente");
+    } catch (error) {
+      console.error("Error deleting album:", error);
+      toast.error("Error al eliminar el álbum");
+    }
+  };
+
+  const handleDeleteImage = async (imageId) => {
+    try {
+      await deleteImage(imageId);
+
+      const updatedImages = images.filter((img) => img.id !== imageId);
+      setImages(updatedImages);
+
+      // Actualizar contador del álbum localmente (o recargar álbumes)
+      // Opcional: recargar álbumes para actualizar el contador en el sidebar
+      const updatedAlbums = await getAllAlbums();
+      setAlbums(updatedAlbums);
+
+      toast.success("Imagen eliminada exitosamente");
+    } catch (error) {
+      console.error("Error deleting image:", error);
+      toast.error("Error al eliminar la imagen");
+    }
+  };
+
+  const filteredImages = images.filter((img) => {
+    const matchesSearch = img.title
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesCategory =
+      filterCategory === "all" || img.category === filterCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -230,10 +258,12 @@ export function AlbumsView({ open, onOpenChange }) {
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <BookOpen className="w-5 h-5 text-blue-600" />
-                  <h3 className="font-medium text-gray-900 dark:text-white">Álbumes</h3>
+                  <h3 className="font-medium text-gray-900 dark:text-white">
+                    Álbumes
+                  </h3>
                 </div>
-                <Button 
-                  size="sm" 
+                <Button
+                  size="sm"
                   onClick={() => setShowCreateAlbum(true)}
                   className="h-8"
                 >
@@ -261,17 +291,17 @@ export function AlbumsView({ open, onOpenChange }) {
                     <Card
                       key={album.id}
                       className={`cursor-pointer transition-all dark:border-gray-700 overflow-hidden group ${
-                        selectedAlbum?.id === album.id 
-                          ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' 
-                          : 'hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700'
+                        selectedAlbum?.id === album.id
+                          ? "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800"
+                          : "hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700"
                       }`}
                       onClick={() => setSelectedAlbum(album)}
                     >
                       <div className="flex items-center gap-3 p-3">
-                        <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded flex items-center justify-center flex-shrink-0">
-                          {album.coverImage ? (
-                            <img 
-                              src={album.coverImage} 
+                        <div className="w-12 h-12 bg-linear-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded flex items-center justify-center shrink-0">
+                          {album.coverImagePath ? (
+                            <img
+                              src={`file://${album.coverImagePath}`}
                               alt={album.name}
                               className="w-full h-full object-cover rounded"
                             />
@@ -284,30 +314,40 @@ export function AlbumsView({ open, onOpenChange }) {
                             {album.name}
                           </h4>
                           <p className="text-xs text-gray-500 dark:text-gray-400">
-                            {album.imageCount} {album.imageCount === 1 ? "imagen" : "imágenes"}
+                            {album.imageCount}{" "}
+                            {album.imageCount === 1 ? "imagen" : "imágenes"}
                           </p>
                         </div>
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div
+                          className="transition-opacity"
+                          onClick={(e) => e.stopPropagation()}
+                          onPointerDown={(e) => e.stopPropagation()}
+                          onMouseDown={(e) => e.stopPropagation()}
+                        >
                           <DropdownMenu>
-                            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <MoreVertical className="w-4 h-4" />
-                              </Button>
+                            <DropdownMenuTrigger
+                              className="h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 transition-colors"
+                              onClick={(e) => e.stopPropagation()}
+                              onMouseDown={(e) => e.stopPropagation()}
+                            >
+                              <MoreVertical className="w-4 h-4" />
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={(e) => {
-                                e.stopPropagation();
-                                openEditDialog(album);
-                              }}>
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openEditDialog(album);
+                                }}
+                              >
                                 <Edit className="w-4 h-4 mr-2" />
                                 Editar
                               </DropdownMenuItem>
-                              <DropdownMenuItem 
+                              <DropdownMenuItem
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleDeleteAlbum(album.id);
                                 }}
-                                className="text-red-600"
+                                variant="destructive"
                               >
                                 <Trash2 className="w-4 h-4 mr-2" />
                                 Eliminar
@@ -331,14 +371,6 @@ export function AlbumsView({ open, onOpenChange }) {
                 <DialogTitle className="text-xl">
                   {selectedAlbum?.name || "Selecciona un álbum"}
                 </DialogTitle>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onOpenChange(false)}
-                  className="h-8 w-8"
-                >
-                  <X className="w-4 h-4" />
-                </Button>
               </div>
 
               {/* Barra de herramientas */}
@@ -353,14 +385,16 @@ export function AlbumsView({ open, onOpenChange }) {
                     />
                     <Search className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
-                  <select 
-                    value={filterCategory} 
+                  <select
+                    value={filterCategory}
                     onChange={(e) => setFilterCategory(e.target.value)}
                     className="px-3 py-2 bg-background border border-border rounded-md text-sm dark:bg-gray-800"
                   >
                     <option value="all">Todas las categorías</option>
-                    {categories.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
+                    {categories.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
                     ))}
                   </select>
                   <div className="flex items-center gap-1 border border-border rounded-md p-1 dark:border-gray-700">
@@ -404,7 +438,7 @@ export function AlbumsView({ open, onOpenChange }) {
                     No hay imágenes
                   </h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {searchTerm || filterCategory !== "all" 
+                    {searchTerm || filterCategory !== "all"
                       ? "No se encontraron imágenes con los filtros aplicados"
                       : "Procesa y guarda imágenes para verlas aquí"}
                   </p>
@@ -418,9 +452,9 @@ export function AlbumsView({ open, onOpenChange }) {
                       onClick={() => setSelectedImage(image)}
                     >
                       <div className="aspect-square bg-gray-100 dark:bg-gray-700 relative">
-                        {image.upscaledImage ? (
-                          <img 
-                            src={image.upscaledImage} 
+                        {image.upscaledPath ? (
+                          <img
+                            src={`file://${image.upscaledPath}`}
                             alt={image.title}
                             className="w-full h-full object-cover"
                           />
@@ -429,7 +463,7 @@ export function AlbumsView({ open, onOpenChange }) {
                             <ImageIcon className="w-12 h-12 text-gray-400" />
                           </div>
                         )}
-                        
+
                         {/* Delete button */}
                         <Button
                           variant="destructive"
@@ -462,10 +496,10 @@ export function AlbumsView({ open, onOpenChange }) {
                       className="p-4 flex items-center gap-4 cursor-pointer hover:shadow-lg transition-all dark:bg-gray-800 dark:border-gray-700"
                       onClick={() => setSelectedImage(image)}
                     >
-                      <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded flex-shrink-0">
-                        {image.upscaledImage ? (
-                          <img 
-                            src={image.upscaledImage} 
+                      <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded shrink-0">
+                        {image.upscaledPath ? (
+                          <img
+                            src={`file://${image.upscaledPath}`}
                             alt={image.title}
                             className="w-full h-full object-cover rounded"
                           />
@@ -476,9 +510,12 @@ export function AlbumsView({ open, onOpenChange }) {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-gray-900 dark:text-white truncate">{image.title}</h4>
+                        <h4 className="text-gray-900 dark:text-white truncate">
+                          {image.title}
+                        </h4>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {image.category} • {new Date(image.savedAt).toLocaleDateString()}
+                          {image.category} •{" "}
+                          {new Date(image.savedAt).toLocaleDateString()}
                         </p>
                       </div>
                       <Button
@@ -556,16 +593,19 @@ export function AlbumsView({ open, onOpenChange }) {
 
       {/* Image Detail Dialog */}
       {selectedImage && (
-        <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
+        <Dialog
+          open={!!selectedImage}
+          onOpenChange={() => setSelectedImage(null)}
+        >
           <DialogContent className="max-w-4xl">
             <DialogHeader>
               <DialogTitle>{selectedImage.title}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="aspect-video bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden">
-                {selectedImage.upscaledImage && (
-                  <img 
-                    src={selectedImage.upscaledImage} 
+                {selectedImage.upscaledPath && (
+                  <img
+                    src={`file://${selectedImage.upscaledPath}`}
                     alt={selectedImage.title}
                     className="w-full h-full object-contain"
                   />
@@ -574,7 +614,9 @@ export function AlbumsView({ open, onOpenChange }) {
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <p className="text-gray-500 dark:text-gray-400">Categoría</p>
-                  <p className="text-gray-900 dark:text-white">{selectedImage.category}</p>
+                  <p className="text-gray-900 dark:text-white">
+                    {selectedImage.category}
+                  </p>
                 </div>
                 <div>
                   <p className="text-gray-500 dark:text-gray-400">Fecha</p>
