@@ -26,6 +26,7 @@ import {
   Server,
   HelpCircle,
   Info,
+  BookOpen,
 } from "lucide-react";
 import LogoRia from "./components/img/logoria2.svg";
 import { toast } from "sonner";
@@ -40,6 +41,8 @@ import {
 import { Onboarding } from "./components/Onboarding";
 import { AboutDialog } from "./components/AboutDialog";
 import { BackendStatusDialog } from "./components/BackendStatusDialog";
+import { AlbumsView } from "./components/AlbumsView";
+import { SaveToAlbumDialog } from "./components/SaveToAlbumDialog";
 
 export default function App() {
   const [originalImage, setOriginalImage] = useState(null);
@@ -48,6 +51,7 @@ export default function App() {
   const [progress, setProgress] = useState(0);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [renderKey, setRenderKey] = useState(0);
+  const [albumsRefreshTrigger, setAlbumsRefreshTrigger] = useState(0);
 
   // Controls state
   const [scale, setScale] = useState(2);
@@ -67,6 +71,8 @@ export default function App() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [showBackendStatus, setShowBackendStatus] = useState(false);
+  const [showAlbums, setShowAlbums] = useState(false);
+  const [showSaveToAlbum, setShowSaveToAlbum] = useState(false);
 
   // Dark mode effect
   useEffect(() => {
@@ -122,7 +128,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
       {/* Header */}
       <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -148,8 +154,9 @@ export default function App() {
                 size="icon"
                 onClick={() => setShowBackendStatus(true)}
                 aria-label="Estado del Backend"
+                className="[&_svg]:size-5!"
               >
-                <Server className="w-5 h-5" />
+                <Server />
               </Button>
 
               {/* Help Button */}
@@ -158,8 +165,9 @@ export default function App() {
                 size="icon"
                 onClick={() => setShowOnboarding(true)}
                 aria-label="Ayuda"
+                className="[&_svg]:size-5!"
               >
-                <HelpCircle className="w-5 h-5" />
+                <HelpCircle />
               </Button>
 
               {/* About Button */}
@@ -168,8 +176,20 @@ export default function App() {
                 size="icon"
                 onClick={() => setShowAbout(true)}
                 aria-label="Acerca de"
+                className="[&_svg]:size-5!"
               >
-                <Info className="w-5 h-5" />
+                <Info />
+              </Button>
+
+              {/* Albums Button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowAlbums(true)}
+                aria-label="Álbumes"
+                className="[&_svg]:size-5!"
+              >
+                <BookOpen />
               </Button>
 
               {/* Dark Mode Toggle */}
@@ -349,7 +369,7 @@ export default function App() {
 
                 {!isProcessing && originalImage && upscaledImage && (
                   <div className="space-y-6" key={renderKey}>
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
                       <div>
                         <h2 className="text-gray-900 dark:text-white">
                           Comparación de Resultados
@@ -358,10 +378,19 @@ export default function App() {
                           Desliza para comparar antes y después
                         </p>
                       </div>
-                      <Button onClick={handleDownload}>
-                        <Download className="w-4 h-4 mr-2" />
-                        Descargar
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => setShowSaveToAlbum(true)}
+                        >
+                          <BookOpen className="w-4 h-4 mr-2" />
+                          Guardar en Álbum
+                        </Button>
+                        <Button onClick={handleDownload}>
+                          <Download className="w-4 h-4 mr-2" />
+                          Descargar
+                        </Button>
+                      </div>
                     </div>
 
                     <ImageComparison
@@ -401,7 +430,7 @@ export default function App() {
 
                 {!isProcessing && originalImage && !upscaledImage && (
                   <div className="flex flex-col items-center justify-center py-20 text-center">
-                    <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-full flex items-center justify-center mb-4">
+                    <div className="w-20 h-20 bg-linear-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-full flex items-center justify-center mb-4">
                       <Sparkles className="w-10 h-10 text-blue-600 dark:text-blue-400" />
                     </div>
                     <h2 className="text-gray-900 dark:text-white mb-2">
@@ -449,7 +478,7 @@ export default function App() {
               </div>
 
               <Button
-                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                className="w-full bg-linear-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
                 size="lg"
                 onClick={handleUpscale}
                 disabled={isProcessing}
@@ -472,6 +501,22 @@ export default function App() {
       <BackendStatusDialog
         open={showBackendStatus}
         onOpenChange={setShowBackendStatus}
+      />
+
+      {/* Albums View */}
+      <AlbumsView 
+        open={showAlbums} 
+        onOpenChange={setShowAlbums}
+        refreshTrigger={albumsRefreshTrigger}
+      />
+
+      {/* Save to Album Dialog */}
+      <SaveToAlbumDialog
+        open={showSaveToAlbum}
+        onOpenChange={setShowSaveToAlbum}
+        originalImage={originalImage}
+        upscaledImage={upscaledImage}
+        onSave={() => setAlbumsRefreshTrigger(prev => prev + 1)}
       />
     </div>
   );
