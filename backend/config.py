@@ -41,6 +41,7 @@ REALESRGAN_EXECUTABLE = {
 MODELS = {
     "general": {
         "name": "realesrgan-x4plus",
+        "display_name": "General Purpose",
         "filename": "realesrgan-x4plus.bin",
         "param_filename": "realesrgan-x4plus.param",
         "scale": 4,
@@ -48,31 +49,35 @@ MODELS = {
     },
     "anime": {
         "name": "realesrgan-x4plus-anime",
+        "display_name": "Anime & Arte",
         "filename": "realesrgan-x4plus-anime.bin",
         "param_filename": "realesrgan-x4plus-anime.param",
         "scale": 4,
         "description": "Optimizado para anime e ilustraciones"
     },
-    "anime-video-2x": {
+    "media-vision-lite": {
         "name": "realesr-animevideov3",
+        "display_name": "Media Vision Lite",
         "filename": "realesr-animevideov3-x2.bin",
         "param_filename": "realesr-animevideov3-x2.param",
         "scale": 2,
-        "description": "Optimizado para anime y video 2x"
+        "description": "Optimizado para multimedia 2x"
     },
-    "anime-video-3x": {
+    "media-vision-medium": {
         "name": "realesr-animevideov3",
+        "display_name": "Media Vision Medium",
         "filename": "realesr-animevideov3-x3.bin",
         "param_filename": "realesr-animevideov3-x3.param",
         "scale": 3,
-        "description": "Optimizado para anime y video 3x"
+        "description": "Optimizado para multimedia 3x"
     },
-    "anime-video-4x": {
-        "name": "realesr-animevideov3",
+    "media-vision-pro": {
+        "name": "realesr-animevideov3" ,
+        "display_name": "Media Vision Pro",
         "filename": "realesr-animevideov3-x4.bin",
         "param_filename": "realesr-animevideov3-x4.param",
         "scale": 4,
-        "description": "Optimizado para anime y video 4x"
+        "description": "Optimizado para multimedia 4x"
     }
 }
 

@@ -3,8 +3,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Slider } from "./ui/slider";
 import { Switch } from "./ui/switch";
 import { Card } from "./ui/card";
-import { Info, Zap } from "lucide-react";
+import { Info, Zap, Lock } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
+import { useEffect } from "react";
 
 export function UpscaleControls({
   scale,
@@ -17,6 +18,16 @@ export function UpscaleControls({
   orientation = "vertical", // "vertical" | "horizontal"
 }) {
   const isHorizontal = orientation === "horizontal";
+  
+  // Modelos que tienen el factor de escala bloqueado a 4x
+  const isScaleLocked = model === "general" || model === "anime";
+  
+  // Efecto para forzar el scale a 4 cuando se selecciona un modelo bloqueado
+  useEffect(() => {
+    if (isScaleLocked && scale !== 4) {
+      onScaleChange(4);
+    }
+  }, [model, isScaleLocked, scale, onScaleChange]);
   
   return (
     <Card className={`p-6 dark:bg-gray-800 dark:border-gray-700 ${isHorizontal ? '' : 'space-y-6'}`}>
@@ -51,11 +62,11 @@ export function UpscaleControls({
               <SelectValue placeholder="Seleccionar modelo" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="general">General Purpose (4x)</SelectItem>
-              <SelectItem value="anime">Anime & Arte (4x)</SelectItem>
-              <SelectItem value="anime-video-2x">Anime Video (2x)</SelectItem>
-              <SelectItem value="anime-video-3x">Anime Video (3x)</SelectItem>
-              <SelectItem value="anime-video-4x">Anime Video (4x)</SelectItem>
+              <SelectItem value="general">General Purpose</SelectItem>
+              <SelectItem value="anime">Anime & Arte</SelectItem>
+              <SelectItem value="media-vision-lite">Media Vision Lite</SelectItem>
+              <SelectItem value="media-vision-medium">Media Vision Medium</SelectItem>
+              <SelectItem value="media-vision-pro">Media Vision Pro</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -63,8 +74,24 @@ export function UpscaleControls({
         {/* Scale Factor */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label className="dark:text-gray-200">Factor de Escala</Label>
-            <span className="text-sm text-blue-600 dark:text-blue-400">{scale}x</span>
+            <div className="flex items-center gap-2">
+              <Label className="dark:text-gray-200">Factor de Escala</Label>
+              {isScaleLocked && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Lock className="w-4 h-4 text-amber-500" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="max-w-xs">Este modelo solo soporta escala 4x</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+            </div>
+            <span className={`text-sm ${isScaleLocked ? 'text-amber-600 dark:text-amber-400 font-semibold' : 'text-blue-600 dark:text-blue-400'}`}>
+              {scale}x
+            </span>
           </div>
           <Slider
             value={[scale]}
@@ -72,10 +99,13 @@ export function UpscaleControls({
             min={2}
             max={4}
             step={1}
-            disabled={disabled}
+            disabled={disabled || isScaleLocked}
+            className={isScaleLocked ? 'opacity-50' : ''}
           />
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            Mayor escala = mayor resolución pero más tiempo de procesamiento
+            {isScaleLocked 
+              ? "Este modelo está optimizado para escala 4x únicamente" 
+              : "Mayor escala = mayor resolución pero más tiempo de procesamiento"}
           </p>
         </div>
 
