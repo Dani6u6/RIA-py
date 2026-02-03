@@ -26,6 +26,8 @@ import {
   Trash2,
   Edit,
   Image as ImageIcon,
+  Download,
+  Upload,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -36,6 +38,8 @@ import {
   searchImages,
   createAlbum,
   updateAlbum,
+  exportAlbum,
+  importAlbum,
 } from "../utils/database";
 import { readImageAsBase64 } from "../utils/storage";
 
@@ -230,6 +234,50 @@ export function AlbumsView({ open, onOpenChange, refreshTrigger }) {
     }
   };
 
+  const handleExportAlbum = async (albumId, albumName) => {
+    try {
+      toast.info(`Exportando álbum "${albumName}"...`);
+      const result = await exportAlbum(albumId);
+      
+      if (result.canceled) {
+        return;
+      }
+      
+      if (result.success) {
+        toast.success(`Álbum "${albumName}" exportado exitosamente`);
+      }
+    } catch (error) {
+      console.error("Error exporting album:", error);
+      toast.error("Error al exportar el álbum");
+    }
+  };
+
+  const handleImportAlbum = async () => {
+    try {
+      const result = await importAlbum();
+      
+      if (result.canceled) {
+        return;
+      }
+      
+      if (result.success) {
+        // Recargar álbumes
+        const updatedAlbums = await getAllAlbums();
+        setAlbums(updatedAlbums);
+        
+        // Seleccionar el álbum importado
+        if (result.album) {
+          setSelectedAlbum(result.album);
+        }
+        
+        toast.success(`Álbum "${result.album.name}" importado exitosamente con ${result.imageCount} imágenes`);
+      }
+    } catch (error) {
+      console.error("Error importing album:", error);
+      toast.error("Error al importar el álbum. Verifica que el archivo sea válido.");
+    }
+  };
+
   const filteredImages = images.filter((img) => {
     const matchesSearch = img.title
       .toLowerCase()
@@ -262,13 +310,24 @@ export function AlbumsView({ open, onOpenChange, refreshTrigger }) {
                     Álbumes
                   </h3>
                 </div>
-                <Button
-                  size="sm"
-                  onClick={() => setShowCreateAlbum(true)}
-                  className="h-8"
-                >
-                  <FolderPlus className="w-4 h-4" />
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleImportAlbum}
+                    className="h-8"
+                    title="Importar álbum"
+                  >
+                    <Upload className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => setShowCreateAlbum(true)}
+                    className="h-8"
+                  >
+                    <FolderPlus className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
             </div>
 
@@ -341,6 +400,15 @@ export function AlbumsView({ open, onOpenChange, refreshTrigger }) {
                               >
                                 <Edit className="w-4 h-4 mr-2" />
                                 Editar
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleExportAlbum(album.id, album.name);
+                                }}
+                              >
+                                <Download className="w-4 h-4 mr-2" />
+                                Exportar
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={(e) => {
