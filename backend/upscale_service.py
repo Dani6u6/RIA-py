@@ -266,7 +266,7 @@ class RealESRGANService:
             if model_path.exists() and param_path.exists():
                 available.append({
                     "id": model_id,
-                    "name": model_info["name"],
+                    "name": model_info.get("display_name", model_info["name"]),
                     "description": model_info["description"],
                     "scale": model_info["scale"]
                 })

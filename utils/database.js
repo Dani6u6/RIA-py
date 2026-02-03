@@ -137,3 +137,30 @@ export async function searchImages(albumId, searchText, category) {
     return [];
   }
 }
+
+/**
+ * Exporta un álbum como archivo .ria-album
+ * @param {number} albumId - ID del álbum a exportar
+ * @returns {Promise<Object>} Resultado de la exportación
+ */
+export async function exportAlbum(albumId) {
+  try {
+    return await ipcRenderer.invoke('db:exportAlbum', albumId);
+  } catch (error) {
+    console.error("Error exporting album:", error);
+    throw error;
+  }
+}
+
+/**
+ * Importa un álbum desde un archivo .ria-album
+ * @returns {Promise<Object>} Resultado de la importación con datos del álbum
+ */
+export async function importAlbum() {
+  try {
+    return await ipcRenderer.invoke('db:importAlbum');
+  } catch (error) {
+    console.error("Error importing album:", error);
+    throw error;
+  }
+}

@@ -112,32 +112,32 @@ export async function getAvailableModels() {
     return [
       {
         id: "general",
-        name: "realesrgan-x4plus",
+        name: "General Purpose (4x)",
         description: "Modelo general para todo tipo de imágenes",
         scale: 4,
       },
       {
         id: "anime",
-        name: "realesrgan-x4plus-anime",
+        name: "Anime & Arte (4x)",
         description: "Optimizado para anime e ilustraciones",
         scale: 4,
       },
       {
-        id: "anime-video-2x",
-        name: "realesr-animevideov3",
-        description: "Optimizado para anime y video 2x",
+        id: "media-vision-lite",
+        name: "Media Vision Lite",
+        description: "Optimizado para multimedia 2x",
         scale: 2,
       },
       {
-        id: "anime-video-3x",
-        name: "realesr-animevideov3",
-        description: "Optimizado para anime y video 3x",
+        id: "media-vision-medium",
+        name: "Media Vision Medium",
+        description: "Optimizado para multimedia 3x",
         scale: 3,
       },
       {
-        id: "anime-video-4x",
-        name: "realesr-animevideov3",
-        description: "Optimizado para anime y video 4x",
+        id: "media-vision-pro",
+        name: "Media Vision Pro",
+        description: "Optimizado para multimedia 4x",
         scale: 4,
       },
     ];

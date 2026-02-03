@@ -3,6 +3,7 @@ const path = require("path");
 const sqlite3 = require("sqlite3").verbose();
 const fs = require("fs");
 const sizeOf = require("image-size");
+const AdmZip = require("adm-zip");
 
 let db;
 
@@ -454,6 +455,292 @@ ipcMain.handle("storage:getImageInfo", async (event, imagePath) => {
     throw error;
   }
 });
+
+// Exportar álbum
+ipcMain.handle("db:exportAlbum", async (event, albumId) => {
+  try {
+    // Obtener datos del álbum
+    const album = await new Promise((resolve, reject) => {
+      db.get("SELECT * FROM albums WHERE id = ?", [albumId], (err, row) => {
+        if (err) reject(err);
+        else resolve(row);
+      });
+    });
+
+    if (!album) {
+      throw new Error("Album not found");
+    }
+
+    // Obtener imágenes del álbum
+    const images = await new Promise((resolve, reject) => {
+      db.all(
+        "SELECT * FROM images WHERE albumId = ?",
+        [albumId],
+        (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows);
+        }
+      );
+    });
+
+    // Crear directorio temporal
+    const tempDir = path.join(app.getPath("temp"), `album_export_${Date.now()}`);
+    fs.mkdirSync(tempDir, { recursive: true });
+
+    const imagesDir = path.join(tempDir, "images");
+    fs.mkdirSync(imagesDir, { recursive: true });
+
+    // Copiar archivos de imágenes
+    const imageRecords = [];
+    for (const image of images) {
+      const originalFilename = path.basename(image.originalPath);
+      const upscaledFilename = path.basename(image.upscaledPath);
+
+      // Copiar archivos si existen
+      if (fs.existsSync(image.originalPath)) {
+        fs.copyFileSync(
+          image.originalPath,
+          path.join(imagesDir, originalFilename)
+        );
+      }
+      if (fs.existsSync(image.upscaledPath)) {
+        fs.copyFileSync(
+          image.upscaledPath,
+          path.join(imagesDir, upscaledFilename)
+        );
+      }
+
+      // Guardar registro con rutas relativas
+      imageRecords.push({
+        title: image.title,
+        category: image.category,
+        originalPath: originalFilename,
+        upscaledPath: upscaledFilename,
+        originalResolution: image.originalResolution,
+        upscaledResolution: image.upscaledResolution,
+        model: image.model,
+        savedAt: image.savedAt,
+      });
+    }
+
+    // Crear manifest
+    const manifest = {
+      version: "1.0",
+      exportDate: new Date().toISOString(),
+      album: {
+        name: album.name,
+        imageCount: album.imageCount,
+        createdAt: album.createdAt,
+      },
+      images: imageRecords,
+    };
+
+    // Guardar manifest.json
+    fs.writeFileSync(
+      path.join(tempDir, "manifest.json"),
+      JSON.stringify(manifest, null, 2)
+    );
+
+    // Mostrar diálogo para guardar
+    const { filePath, canceled } = await dialog.showSaveDialog({
+      title: "Exportar Álbum",
+      defaultPath: `${album.name}.ria-album`,
+      filters: [{ name: "RIA Album", extensions: ["ria-album"] }],
+    });
+
+    if (canceled || !filePath) {
+      // Limpiar directorio temporal
+      fs.rmSync(tempDir, { recursive: true, force: true });
+      return { success: false, canceled: true };
+    }
+
+    // Crear ZIP
+    const zip = new AdmZip();
+    zip.addLocalFolder(tempDir);
+    zip.writeZip(filePath);
+
+    // Limpiar directorio temporal
+    fs.rmSync(tempDir, { recursive: true, force: true });
+
+    return {
+      success: true,
+      filePath,
+      albumName: album.name,
+      imageCount: images.length,
+    };
+  } catch (error) {
+    console.error("Error exporting album:", error);
+    throw error;
+  }
+});
+
+// Importar álbum
+ipcMain.handle("db:importAlbum", async () => {
+  try {
+    // Mostrar diálogo para seleccionar archivo
+    const { filePaths, canceled } = await dialog.showOpenDialog({
+      title: "Importar Álbum",
+      filters: [{ name: "RIA Album", extensions: ["ria-album"] }],
+      properties: ["openFile"],
+    });
+
+    if (canceled || filePaths.length === 0) {
+      return { success: false, canceled: true };
+    }
+
+    const importFilePath = filePaths[0];
+
+    // Crear directorio temporal para extracción
+    const tempDir = path.join(app.getPath("temp"), `album_import_${Date.now()}`);
+    fs.mkdirSync(tempDir, { recursive: true });
+
+    // Extraer ZIP
+    const zip = new AdmZip(importFilePath);
+    zip.extractAllTo(tempDir, true);
+
+    // Leer manifest
+    const manifestPath = path.join(tempDir, "manifest.json");
+    if (!fs.existsSync(manifestPath)) {
+      throw new Error("Invalid album file: manifest.json not found");
+    }
+
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+
+    // Validar versión del manifest
+    if (!manifest.version || !manifest.album || !manifest.images) {
+      throw new Error("Invalid album file: corrupted manifest");
+    }
+
+    // Verificar conflicto de nombres y resolver
+    let albumName = manifest.album.name;
+    const existingAlbums = await new Promise((resolve, reject) => {
+      db.all(
+        "SELECT name FROM albums WHERE name LIKE ?",
+        [`${albumName}%`],
+        (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows);
+        }
+      );
+    });
+
+    if (existingAlbums.length > 0) {
+      const existingNames = existingAlbums.map((a) => a.name);
+      let counter = 2;
+      while (existingNames.includes(albumName)) {
+        albumName = `${manifest.album.name} (${counter})`;
+        counter++;
+      }
+    }
+
+    // Crear álbum en la base de datos
+    const albumId = await new Promise((resolve, reject) => {
+      const createdAt = new Date().toISOString();
+      db.run(
+        "INSERT INTO albums (name, imageCount, createdAt) VALUES (?, 0, ?)",
+        [albumName, createdAt],
+        function (err) {
+          if (err) reject(err);
+          else resolve(this.lastID);
+        }
+      );
+    });
+
+    // Crear directorio del álbum
+    const albumDir = path.join(
+      app.getPath("userData"),
+      "albums",
+      `album_${albumId}`
+    );
+    fs.mkdirSync(albumDir, { recursive: true });
+
+    const originalDir = path.join(albumDir, "original");
+    const upscaledDir = path.join(albumDir, "upscaled");
+    fs.mkdirSync(originalDir, { recursive: true });
+    fs.mkdirSync(upscaledDir, { recursive: true });
+
+    // Importar imágenes
+    const imagesSourceDir = path.join(tempDir, "images");
+    let firstUpscaledPath = null;
+
+    for (const imageRecord of manifest.images) {
+      const originalSrc = path.join(imagesSourceDir, imageRecord.originalPath);
+      const upscaledSrc = path.join(imagesSourceDir, imageRecord.upscaledPath);
+
+      const originalDest = path.join(originalDir, imageRecord.originalPath);
+      const upscaledDest = path.join(upscaledDir, imageRecord.upscaledPath);
+
+      // Copiar archivos
+      if (fs.existsSync(originalSrc)) {
+        fs.copyFileSync(originalSrc, originalDest);
+      }
+      if (fs.existsSync(upscaledSrc)) {
+        fs.copyFileSync(upscaledSrc, upscaledDest);
+        if (!firstUpscaledPath) {
+          firstUpscaledPath = upscaledDest;
+        }
+      }
+
+      // Insertar registro en la base de datos
+      await new Promise((resolve, reject) => {
+        db.run(
+          `INSERT INTO images 
+          (albumId, title, category, originalPath, upscaledPath, 
+           originalResolution, upscaledResolution, model, savedAt)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            albumId,
+            imageRecord.title,
+            imageRecord.category,
+            originalDest,
+            upscaledDest,
+            imageRecord.originalResolution,
+            imageRecord.upscaledResolution,
+            imageRecord.model,
+            imageRecord.savedAt,
+          ],
+          (err) => {
+            if (err) reject(err);
+            else resolve();
+          }
+        );
+      });
+    }
+
+    // Actualizar contador de imágenes y cover
+    await new Promise((resolve, reject) => {
+      db.run(
+        "UPDATE albums SET imageCount = ?, coverImagePath = ? WHERE id = ?",
+        [manifest.images.length, firstUpscaledPath, albumId],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+
+    // Limpiar directorio temporal
+    fs.rmSync(tempDir, { recursive: true, force: true });
+
+    // Obtener álbum completo para retornar
+    const importedAlbum = await new Promise((resolve, reject) => {
+      db.get("SELECT * FROM albums WHERE id = ?", [albumId], (err, row) => {
+        if (err) reject(err);
+        else resolve(row);
+      });
+    });
+
+    return {
+      success: true,
+      album: importedAlbum,
+      imageCount: manifest.images.length,
+    };
+  } catch (error) {
+    console.error("Error importing album:", error);
+    throw error;
+  }
+});
+
 
 app.whenReady().then(() => {
   initDatabase();
