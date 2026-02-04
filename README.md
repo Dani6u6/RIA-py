@@ -2,7 +2,7 @@
 
 Aplicación de escritorio para reescalado de imágenes usando IA, construida con React, Tailwind CSS, Electron y FastAPI.
 
-## 🚀 Características
+## Características
 
 - 🖼️ Carga de imágenes por drag-and-drop
 - 🔄 Comparación interactiva antes/después con slider draggable
@@ -14,84 +14,6 @@ Aplicación de escritorio para reescalado de imágenes usando IA, construida con
 - 💾 Descarga de imágenes procesadas
 - 🎨 Diseño Material UI con Tailwind CSS
 - 🖥️ Backend Real-ESRGAN opcional (IA real)
-
-## 📋 Inicio Rápido
-
-### Frontend (React + Electron)
-
-```bash
-# Instalar dependencias
-npm install
-
-# Ejecutar en modo desarrollo
-npm run dev
-
-# Ejecutar con Electron
-npm run electron-dev
-```
-
-### Backend (FastAPI + Real-ESRGAN) - Opcional
-
-```bash
-cd backend
-pip install -r requirements.txt
-python setup.py        # Descarga binarios y modelos
-python main.py         # Inicia el servidor
-```
-
-**Ver guía completa**: [`docs/backend/INICIO_RAPIDO.md`](docs/backend/INICIO_RAPIDO.md)
-
-## 📁 Estructura del Proyecto
-
-```
-/
-├── components/        # Componentes React
-│   ├── ImageComparison.jsx      # Comparador con zoom + pan
-│   ├── ImageUploader.jsx        # Cargador drag-and-drop
-│   ├── UpscaleControls.jsx      # Controles de reescalado
-│   ├── BackendStatusDialog.jsx  # Estado del backend
-│   └── ui/                      # Componentes shadcn/ui
-├── backend/           # Backend FastAPI + Real-ESRGAN
-│   ├── main.py                  # API principal
-│   ├── upscale_service.py       # Servicio de IA
-│   └── config.py                # Configuración
-├── docs/              # 📚 Documentación completa
-│   ├── README.md                # Índice de docs
-│   ├── INSTALACION.md           # Guía de instalación
-│   ├── backend/                 # Docs del backend
-│   └── ...                      # Más documentación
-├── electron/          # Archivos de Electron
-├── styles/            # Estilos globales (Tailwind v4.0)
-├── utils/             # Utilidades (API, scripts)
-├── App.jsx            # Componente principal
-├── main.jsx           # Punto de entrada React
-└── package.json       # Dependencias y scripts
-```
-
-## 🎮 Uso
-
-1. **Activar Backend** (opcional):
-   - Inicia el backend: `cd backend && python main.py`
-   - En la app, activa el switch "Real-ESRGAN (Backend)" en UpscaleControls
-2. **Cargar imagen**: Arrastra y suelta o haz clic en "Seleccionar imagen"
-
-3. **Configurar parámetros**:
-
-   - Modelo de IA (General, Anime, Anime Video 2x/3x/4x)
-   - Factor de escala (2x, 3x, 4x)
-
-4. **Procesar**: Haz clic en "Reescalar Imagen"
-
-   - Con backend: Procesamiento real con IA
-   - Sin backend: Simulación local en el navegador
-
-5. **Comparar**:
-
-   - Arrastra el círculo blanco para comparar antes/después
-   - Usa los botones de zoom para inspeccionar detalles
-   - Con zoom activo, arrastra la imagen para navegar
-
-6. **Descargar**: Guarda la imagen procesada
 
 ## 🔧 Tecnologías
 
@@ -136,56 +58,6 @@ python main.py         # Inicia el servidor
 - **[Integration](docs/INTEGRATION.md)** - Frontend-Backend integration
 - **[Resumen Proyecto](docs/RESUMEN_PROYECTO.md)** - Resumen general
 
-## 🆕 Novedades - Versión 32
-
-### ✨ Interfaz 50% Más Compacta
-
-- ✅ Eliminado control de denoise (no funcional con ncnn-vulkan)
-- ✅ Toggle de backend integrado en UpscaleControls
-- ✅ Estado del backend movido a modal accesible desde header
-- ✅ Solo 2 elementos principales en lugar de 4 cards
-
-### 🎯 Comparador Mejorado
-
-- ✅ **Handle draggable**: Arrastra el círculo blanco para comparar
-- ✅ **Pan con zoom**: Navega la imagen cuando está con zoom
-- ✅ Cursors dinámicos (grab/grabbing/ew-resize)
-- ✅ Indicadores contextuales
-- ✅ Soporte completo touch/móvil
-
-### 🖥️ Modal de Diagnóstico
-
-- ✅ BackendStatusDialog con troubleshooting integrado
-- ✅ Auto-refresh al abrir
-- ✅ Lista de modelos disponibles
-- ✅ Comandos rápidos
-
-Ver detalles: [INTERFAZ_COMPACTADA.md](docs/INTERFAZ_COMPACTADA.md) y [MEJORAS_IMAGE_COMPARISON.md](docs/MEJORAS_IMAGE_COMPARISON.md)
-
-## ⚠️ Importante: Tailwind CSS v4.0
-
-Este proyecto usa **Tailwind CSS v4.0**, que NO requiere `tailwind.config.js`.
-
-Toda la configuración se maneja en `styles/globals.css` usando la directiva `@theme`.
-
-**Ver**: [`docs/TAILWIND_CONFIG.md`](docs/TAILWIND_CONFIG.md)
-
-## 🌐 Backend de IA Real
-
-La aplicación puede funcionar con o sin backend:
-
-- **Sin backend**: Simulación local en el navegador
-- **Con backend**: Real-ESRGAN con IA real y aceleración GPU
-
-### Características del Backend:
-
-- ✅ Real-ESRGAN con Vulkan (acelerado por GPU)
-- ✅ Sin PyTorch (usa binarios precompilados ~500MB)
-- ✅ 5 modelos: General, Anime, Anime Video (2x/3x/4x)
-- ✅ Setup automático con un comando
-- ✅ Fallback automático a simulación si no está disponible
-
-**Guía rápida**: [`docs/backend/INICIO_RAPIDO.md`](docs/backend/INICIO_RAPIDO.md)
 
 ## 🆘 Solución de Problemas
 
@@ -194,14 +66,55 @@ La aplicación puede funcionar con o sin backend:
 - **Timeout de procesamiento**: Ver [docs/AUMENTAR_TIMEOUT.md](docs/AUMENTAR_TIMEOUT.md)
 - **Configuración general**: Ver [docs/CONFIGURACION_COMPLETA.md](docs/CONFIGURACION_COMPLETA.md)
 
-## 📝 Scripts Disponibles
+---
 
-```bash
-npm run dev          # Desarrollo con Vite
-npm run build        # Compilar producción
-npm run electron-dev # Electron en desarrollo
-npm run preview      # Preview de producción
-```
+## 💻 Sistemas Operativos Compatibles
+
+### ✅ Soportados
+- **Windows** 10/11 (64-bit)
+- **macOS** 10.13 (High Sierra) o superior
+- **Linux** (Ubuntu 18.04+, Fedora 32+, Debian 10+)
+
+### ⚠️ Notas
+- Se requiere arquitectura x64 (64-bit)
+- ARM64/Apple Silicon soportado en macOS con Rosetta 2
+
+---
+
+## 🖥️ Requisitos de Hardware
+
+### Mínimos
+
+| Componente | Requisito Mínimo |
+|------------|------------------|
+| **CPU** | Intel Core i3 / AMD Ryzen 3 (2 núcleos, 4 hilos) |
+| **RAM** | 4 GB |
+| **Almacenamiento** | 2 GB libres (500 MB app + 1.5 GB modelos) |
+| **GPU** | Vulkan 1.0 compatible (integrada) |
+| **Pantalla** | 1280x720 (HD) |
+
+### Recomendados
+
+| Componente | Requisito Recomendado |
+|------------|----------------------|
+| **CPU** | Intel Core i5 / AMD Ryzen 5 (4 núcleos, 8 hilos) o superior |
+| **RAM** | 8 GB o más |
+| **Almacenamiento** | 5 GB libres (SSD recomendado) |
+| **GPU** | GPU dedicada con Vulkan 1.2+ (NVIDIA GTX 1050, AMD RX 560 o superior) |
+| **Pantalla** | 1920x1080 (Full HD) o superior |
+
+### Para Procesamiento Óptimo
+
+| Componente | Requisito Óptimo |
+|------------|-----------------|
+| **CPU** | Intel Core i7 / AMD Ryzen 7 (6+ núcleos) |
+| **RAM** | 16 GB |
+| **Almacenamiento** | 10 GB libres en SSD NVMe |
+| **GPU** | NVIDIA RTX 2060 / AMD RX 5700 o superior |
+| **VRAM** | 4 GB o más |
+
+---
+
 
 ## 📄 Licencia
 
